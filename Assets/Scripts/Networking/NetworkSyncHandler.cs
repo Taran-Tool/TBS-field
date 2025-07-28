@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 
-public class NetworkSyncHandler : MonoBehaviour
+public class NetworkSyncHandler : NetworkBehaviour
 {
     public static NetworkSyncHandler instance
     {
@@ -15,7 +15,6 @@ public class NetworkSyncHandler : MonoBehaviour
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {

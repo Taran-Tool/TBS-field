@@ -5,14 +5,15 @@ using UnityEngine.UI;
 
 public class GameHUD : MonoBehaviour
 {
-    public static GameHUD Instance
+    public static GameHUD instance
     {
         get; private set;
     }
 
     [Header("Player Info")]
     [SerializeField] private Image _playerIndicator;
-    [SerializeField] private Text _turnText;
+    [SerializeField] private TMPro.TMP_Text _turnText;
+    [SerializeField] private TMPro.TMP_Text _turnCount;
 
     public Player LocalPlayer
     {
@@ -21,10 +22,9 @@ public class GameHUD : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null)
+        if (instance == null)
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
+            instance = this;
         }
         else
         {
@@ -42,8 +42,8 @@ public class GameHUD : MonoBehaviour
     {
         Color teamColor = LocalPlayer switch
         {
-            Player.Player1 => Color.blue,
-            Player.Player2 => Color.red,
+            Player.Player1 => Color.red,
+            Player.Player2 => Color.blue,
             _ => Color.gray
         };
 
@@ -53,6 +53,14 @@ public class GameHUD : MonoBehaviour
     public void UpdateTurnDisplay(Player currentPlayer)
     {
         _turnText.text = $"{currentPlayer}'s Turn";
-        _turnText.color = currentPlayer == LocalPlayer ? Color.green : Color.red;
+        _turnText.color = currentPlayer == LocalPlayer ? Color.red : Color.blue;
+    }
+
+    public void ReturnToMenu()
+    {
+        //отключение
+
+        //загрузка сцены
+        NetworkSceneManager.instance.LoadMainMenu();
     }
 }

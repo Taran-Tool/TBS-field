@@ -20,7 +20,7 @@ public class NetworkPlayer : NetworkBehaviour
         if (IsOwner)
         {
             //отображаю GUI игрока согласно его команде
-           // GameHUD.Instance.SetLocalPlayer(Team);
+            GameHUD.instance.SetLocalPlayer(Team);
         }
     }
 

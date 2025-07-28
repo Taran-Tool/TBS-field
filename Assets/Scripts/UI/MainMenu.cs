@@ -26,13 +26,13 @@ public class MainMenu : MonoBehaviour
     public void OnHostButtonClick()
     {
         GameNetworkManager.instance.StartHostGame();
-        //SceneManager.LoadScene("GameScene");
+        NetworkSceneManager.instance.LoadGameScene();
     }
 
     public void OnJoinButtonClick()
     {
         GameNetworkManager.instance.JoinGame(_ipInputField.text);
-        //SceneManager.LoadScene("GameScene");
+        NetworkSceneManager.instance.LoadGameScene();
     }
 
     public void OnQuitButtonClick()

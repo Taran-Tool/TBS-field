@@ -43,14 +43,11 @@ public class GameNetworkManager : NetworkManager
         //создаю игровой мир
         if (IsServer)
         {
-            //cоздаю CommandHandler
+            //cоздаю помощников и менеджеров
             SpawnCommandHandler();
             SpawnSyncHandler();
-
-            //генератор карты
-            //WorldGenerator.Instance.GenerateMap();
-            //игроки
-              SpawnPlayers();
+            SpawnSceneManager();
+            SpawnPlayerSpawner();
         }
     }
 
@@ -65,6 +62,20 @@ public class GameNetworkManager : NetworkManager
     {
         GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkSyncHandler"));
         handlerObj.name = "NetworkSyncHandler";
+        handlerObj.GetComponent<NetworkObject>().Spawn();
+    }
+
+    private void SpawnSceneManager()
+    {
+        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkSceneManager"));
+        handlerObj.name = "NetworkSceneManager";
+        handlerObj.GetComponent<NetworkObject>().Spawn();
+    }
+
+    private void SpawnPlayerSpawner()
+    {
+        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkPlayerSpawner"));
+        handlerObj.name = "NetworkPlayerSpawner";
         handlerObj.GetComponent<NetworkObject>().Spawn();
     }
 
@@ -96,34 +107,6 @@ public class GameNetworkManager : NetworkManager
         {
             RegisterLocalPlayer();
         }
-    }
-
-    private void SpawnPlayers()
-    {
-        //сервер создаст обоих игроков
-        var p1 = SpawnPlayer(Player.Player1);
-        var p2 = SpawnPlayer(Player.Player2);
-
-        //определ€ю игроков
-        NetworkCommandHandler.instance.SetPlayers(p1, p2);
-    }
-
-    private NetworkPlayer SpawnPlayer(Player team)
-    {
- 
-        GameObject playerObj = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
-        
-        ulong ownerClientId = team == Player.Player1 ? 0UL : 1UL;
-        playerObj.name = "" + ownerClientId;
-
-          NetworkObject netObj = playerObj.GetComponent<NetworkObject>();
-          var networkPlayer = playerObj.GetComponent<NetworkPlayer>();
-          networkPlayer.Team = team;
-
-
-          netObj.SpawnWithOwnership(ownerClientId);
-
-        return networkPlayer;
     }
 
     private void RegisterLocalPlayer()
