@@ -69,7 +69,7 @@ public class NetworkSceneManager : NetworkBehaviour
     private void InitializeGameWorld()
     {
         // 1. Генерация мира
-        //WorldGenerator.Instance.GenerateMap();
+        WorldGenerator.instance.GenerateMap();
         Debug.Log("Generating world");
 
         // 2. Спавн игроков
@@ -79,5 +79,16 @@ public class NetworkSceneManager : NetworkBehaviour
         //TurnManager.Instance.StartNewGame();
         Debug.Log("Turn manager");
         Debug.Log("Game world initialized on server");
+    }
+
+    private void OnDrawGizmos()
+    {
+        var spawnPoints = WorldGenerator.instance.GetTeamSpawnPoints();
+        
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(spawnPoints[Player.Player1], 10f);
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(spawnPoints[Player.Player2], 10f);
+        
     }
 }

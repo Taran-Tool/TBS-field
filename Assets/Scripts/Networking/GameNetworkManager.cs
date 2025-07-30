@@ -48,6 +48,7 @@ public class GameNetworkManager : NetworkManager
             SpawnSyncHandler();
             SpawnSceneManager();
             SpawnPlayerSpawner();
+            SpawnWorldGenerator();
         }
     }
 
@@ -76,6 +77,13 @@ public class GameNetworkManager : NetworkManager
     {
         GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkPlayerSpawner"));
         handlerObj.name = "NetworkPlayerSpawner";
+        handlerObj.GetComponent<NetworkObject>().Spawn();
+    }
+
+    private void SpawnWorldGenerator()
+    {
+        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkWorldGenerator"));
+        handlerObj.name = "NetworkWorldGenerator";
         handlerObj.GetComponent<NetworkObject>().Spawn();
     }
 
