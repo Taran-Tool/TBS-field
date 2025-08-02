@@ -9,12 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e208bf77bc6be84449005e5c3baae0e0, type: 3}
-  m_Name: LongRock
+  m_Script: {fileID: 11500000, guid: 8a5d04446064b6f41a0d727a02184fb3, type: 3}
+  m_Name: Warrior
   m_EditorClassIdentifier: 
+  unitName: Warrior
+  prefab: {fileID: 1484292197086444612, guid: c6193e5d2ee02e5498a30132d8c55af6, type: 3}
   type: 0
-  primitiveType: 3
-  color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  scale: {x: 1, y: 2, z: 5}
-  minCount: 2
-  maxCount: 5
+  moveRange: 5
+  attackRange: 2
+  scale: {x: 1, y: 1, z: 1}

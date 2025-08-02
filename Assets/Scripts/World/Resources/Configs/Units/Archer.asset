@@ -9,12 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e208bf77bc6be84449005e5c3baae0e0, type: 3}
-  m_Name: Tree
+  m_Script: {fileID: 11500000, guid: 8a5d04446064b6f41a0d727a02184fb3, type: 3}
+  m_Name: Archer
   m_EditorClassIdentifier: 
+  unitName: Archer
+  prefab: {fileID: 5726449311510597882, guid: 73a86a499f45bd34eb26517a9e6f35d9, type: 3}
   type: 1
-  primitiveType: 1
-  color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  scale: {x: 1, y: 3, z: 1}
-  minCount: 5
-  maxCount: 20
+  moveRange: 2
+  attackRange: 5
+  scale: {x: 1, y: 1, z: 1}

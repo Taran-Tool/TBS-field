@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e208bf77bc6be84449005e5c3baae0e0, type: 3}
-  m_Name: Barrier
+  m_Name: Tree
   m_EditorClassIdentifier: 
-  type: 0
-  primitiveType: 0
-  color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  scale: {x: 3, y: 3, z: 3}
-  minCount: 2
-  maxCount: 6
+  type: 1
+  primitiveType: 1
+  color: {r: 0.06554122, g: 0.3773585, b: 0, a: 1}
+  scale: {x: 1, y: 3, z: 1}
+  minCount: 5
+  maxCount: 20

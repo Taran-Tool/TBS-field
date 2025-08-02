@@ -70,11 +70,10 @@ public class NetworkSceneManager : NetworkBehaviour
     {
         // 1. Генерация мира
         WorldGenerator.instance.GenerateMap();
-        Debug.Log("Generating world");
-
         // 2. Спавн игроков
         NetworkPlayerSpawner.instance.SpawnPlayers();
-
+        // 3. Спавн юнитов
+        NetworkUnitsManager.instance.SpawnArmies();
         // 3. Инициализация систем
         //TurnManager.Instance.StartNewGame();
         Debug.Log("Turn manager");
