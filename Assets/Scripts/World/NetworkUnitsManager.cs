@@ -14,19 +14,26 @@ public class NetworkUnitsManager : NetworkBehaviour
     [SerializeField] private float _unitSpacing = 1.5f;
 
     private Dictionary<Player, List<NetworkUnit>> _playerUnits = new();
+    private Dictionary<int, NetworkUnit> _unitsById = new();
 
     private void Awake()
     {
         if (instance == null)
+        {
             instance = this;
+        }
         else
+        {
             Destroy(gameObject);
+        }            
     }
 
     public void SpawnArmies()
     {
         if (!IsServer)
+        {
             return;
+        }            
 
         ArmyConfig armyToUse = GetArmyToUse();
 
@@ -40,7 +47,9 @@ public class NetworkUnitsManager : NetworkBehaviour
     {
         // Если армия задана в инспекторе - использую её
         if (_army != null)
+        {
             return _army;
+        }            
 
         // Иначе загружаю все армии из Resources
         ArmyConfig[] allArmies = Resources.LoadAll<ArmyConfig>("Configs/Armies");
@@ -79,7 +88,9 @@ public class NetworkUnitsManager : NetworkBehaviour
             int unitsInRing = Mathf.FloorToInt(2 * Mathf.PI * currentRadius / _unitSpacing);
 
             if (unitsInRing <= 0)
+            {
                 unitsInRing = 1; // Центральный юнит
+            }                
 
             for (int i = 0; i < unitsInRing && unitsSpawned < unitsToSpawn.Count; i++)
             {
@@ -112,16 +123,19 @@ public class NetworkUnitsManager : NetworkBehaviour
     {
         // Проверка на выход за границы карты
         if (!WorldGenerator.instance.IsPositionInsideMap(position))
+        {
             return false;
+        }            
 
         // Проверка коллизий с препятствиями
         Collider[] colliders = Physics.OverlapSphere(position, _unitSpacing / 2f);
         foreach (var collider in colliders)
         {
             if (collider.CompareTag("Obstacle") || collider.CompareTag("Unit"))
+            {
                 return false;
+            }                
         }
-
         return true;
     }
 
@@ -140,11 +154,18 @@ public class NetworkUnitsManager : NetworkBehaviour
         NetworkObject netObj = unitObj.GetComponent<NetworkObject>();
         netObj.Spawn();
 
+        NetworkSyncHandler.instance.RegisterObjectServerRpc(netObj.NetworkObjectId, "Unit");
+
+        if (!_playerUnits.ContainsKey(player))
+        {
+            _playerUnits[player] = new List<NetworkUnit>();
+        }
         _playerUnits[player].Add(unit);
+        _unitsById[unit.Id] = unit;
     }
     private float GetGroundHeight(Vector3 position)
     {
-        // Делаю рейкаст вниз от высокой точки для поиска земли - на случай если поверхность будет не идеально ровной
+        // Делаю рейкаст вниз c высокой точки для поиска земли - на случай если поверхность будет не идеально ровной
         float raycastHeight = 10f; // Начинаю проверку с этой высоты
         float groundHeight = 0f;
 
@@ -158,9 +179,21 @@ public class NetworkUnitsManager : NetworkBehaviour
         {
             groundHeight = hit.point.y;
         }
-
         return groundHeight + 1f;
     }
 
-    public List<NetworkUnit> GetPlayerUnits(Player player) => _playerUnits[player];
+    public NetworkUnit GetUnitById(int unitId)
+    {
+        return _unitsById.GetValueOrDefault(unitId);
+    }
+
+    public List<NetworkUnit> GetPlayerUnits(Player player)
+    {
+        return _playerUnits.GetValueOrDefault(player, new List<NetworkUnit>());
+    }
+
+    public IEnumerable<NetworkUnit> GetAllUnits()
+    {
+        return _unitsById.Values;
+    }
 }

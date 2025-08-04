@@ -46,8 +46,9 @@ public class NetworkPlayerSpawner : NetworkBehaviour
         var networkPlayer = playerObj.GetComponent<NetworkPlayer>();
         networkPlayer.Team = team;
 
-
         netObj.SpawnWithOwnership(ownerClientId);
+
+        NetworkSyncHandler.instance.RegisterObjectServerRpc(netObj.NetworkObjectId, "Player");
 
         return networkPlayer;
     }

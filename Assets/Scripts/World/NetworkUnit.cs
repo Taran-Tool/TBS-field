@@ -17,6 +17,7 @@ public class NetworkUnit : NetworkBehaviour
     public float MoveRange => _config.moveRange;
     public float AttackRange => _config.attackRange;
     public Vector3 Position => transform.position;
+    public int ConfigId => _config.GetInstanceID();
 
     public void Initialize(UnitConfig config, Player player)
     {
@@ -38,13 +39,51 @@ public class NetworkUnit : NetworkBehaviour
     [ServerRpc]
     public void DestroyServerRpc()
     {
+        if (!IsServer)
+        {
+            return;
+        }
+
         DestroyClientRpc();
+        if (TryGetComponent<NetworkObject>(out var netObj))
+        {
+            netObj.Despawn();
+        }
         Destroy(gameObject);
     }
 
     [ClientRpc]
     private void DestroyClientRpc()
     {
+        if (TryGetComponent<NetworkObject>(out var netObj))
+        {
+            netObj.Despawn();
+        }
         Destroy(gameObject);
+    }
+
+    [ServerRpc]
+    public void SetPositionServerRpc(Vector3 position)
+    {
+        if (!IsServer)
+        {
+            return;
+        }
+
+        SetPositionClientRpc(position);
+    }
+
+    [ClientRpc]
+    private void SetPositionClientRpc(Vector3 position)
+    {
+        transform.position = position;
+    }
+
+    public void SetPosition(Vector3 position)
+    {
+        if (IsServer)
+        {
+            SetPositionServerRpc(position);
+        }
     }
 }

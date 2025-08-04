@@ -50,8 +50,13 @@ public class GameNetworkManager : NetworkManager
             SpawnPlayerSpawner();
             SpawnWorldGenerator();
             SpawnUnitsManager();
+            SpawnTurnManager();
+            SpawnActionSystem();
+            SpawnUnitBehaviorController();
+            SpawnVictorySystem();
         }
     }
+    #region Managers and Handlers
 
     private void SpawnCommandHandler()
     {
@@ -95,6 +100,35 @@ public class GameNetworkManager : NetworkManager
         handlerObj.GetComponent<NetworkObject>().Spawn();
     }
 
+    private void SpawnTurnManager()
+    {
+        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkTurnManager"));
+        handlerObj.name = "NetworkTurnManager";
+        handlerObj.GetComponent<NetworkObject>().Spawn();
+    }
+
+    private void SpawnActionSystem()
+    {
+        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkActionSystem"));
+        handlerObj.name = "NetworkActionSystem";
+        handlerObj.GetComponent<NetworkObject>().Spawn();
+    }
+
+    private void SpawnUnitBehaviorController()
+    {
+        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkUnitBehaviorController"));
+        handlerObj.name = "NetworkUnitBehaviorController";
+        handlerObj.GetComponent<NetworkObject>().Spawn();
+    }
+
+    private void SpawnVictorySystem()
+    {
+        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkVictorySystem"));
+        handlerObj.name = "NetworkVictorySystem";
+        handlerObj.GetComponent<NetworkObject>().Spawn();
+    }
+    #endregion
+
     private void OnHostClientConnected(ulong clientId)
     {
         Debug.Log($"Client connected (Host mode): {clientId}");
@@ -102,7 +136,7 @@ public class GameNetworkManager : NetworkManager
         if (IsServer)
         {
             //начальная синхронизация
-            NetworkSyncHandler.instance.SyncGameStateServerRpc(clientId);
+            NetworkSyncHandler.instance.RequestInitialSyncServerRpc(clientId);
         }
     }
 

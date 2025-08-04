@@ -75,8 +75,7 @@ public class NetworkSceneManager : NetworkBehaviour
         // 3. Спавн юнитов
         NetworkUnitsManager.instance.SpawnArmies();
         // 3. Инициализация систем
-        //TurnManager.Instance.StartNewGame();
-        Debug.Log("Turn manager");
+        NetworkTurnManager.instance.InitializeServerRpc("Default");
         Debug.Log("Game world initialized on server");
     }
 

@@ -17,6 +17,10 @@ public class WorldGenerator : NetworkBehaviour
         get; private set;
     }
 
+    public int MapWidth => _mapWidth;
+    public int MapHeight => _mapHeight;
+    public SpawnZoneType CurrentSpawnType => _currentSpawnZoneType;
+
     [Header("Map Settings")]
     [SerializeField] private int _mapWidth = 32;
     [SerializeField] private int _mapHeight = 32;
@@ -55,7 +59,6 @@ public class WorldGenerator : NetworkBehaviour
     private void RandomizeSpawnZoneType()
     {
         _currentSpawnZoneType = (SpawnZoneType) Random.Range(0, 3);
-        Debug.Log($"Selected spawn type: {_currentSpawnZoneType}");
     }
 
     private void SetupSpawnZones()
@@ -119,10 +122,15 @@ public class WorldGenerator : NetworkBehaviour
         );
 
         if (_groundMaterial != null)
+        {
             _ground.GetComponent<Renderer>().material = _groundMaterial;
+        }
 
-        _ground.AddComponent<NetworkObject>().Spawn();
+        var netObj = _ground.AddComponent<NetworkObject>();
+        netObj.Spawn();
         _ground.tag = "Ground";
+
+        NetworkSyncHandler.instance.RegisterObjectServerRpc(netObj.NetworkObjectId, "Ground");
     }
 
     private void GenerateObstacles()
@@ -147,7 +155,7 @@ public class WorldGenerator : NetworkBehaviour
         const int maxAttempts = 100;
         position = Vector3.zero;
         rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
-        Vector3 halfExtents = config.scale / 1.25f;
+        Vector3 halfExtents = config.scale / 2f;
         float obstacleRadius = Mathf.Max(halfExtents.x, halfExtents.z);
 
         while (attempts < maxAttempts)
@@ -185,9 +193,12 @@ public class WorldGenerator : NetworkBehaviour
 
         obstacle.GetComponent<Renderer>().material.color = config.color;
         obstacle.GetComponent<Collider>().isTrigger = false;
-        obstacle.AddComponent<NetworkObject>().Spawn();
+        var netObj = obstacle.AddComponent<NetworkObject>();
+        netObj.Spawn();
         obstacle.tag = "Obstacle";
         obstacle.name = $"{config.type}_{NetworkObjectId}";
+
+        NetworkSyncHandler.instance.RegisterObjectServerRpc(netObj.NetworkObjectId, "Obstacle");
     }
 
     private void ClearMap()
@@ -217,20 +228,6 @@ public class WorldGenerator : NetworkBehaviour
         };
     }
 
-    /*private void OnDrawGizmosSelected()
-    {
-        if (!Application.isPlaying)
-            return;
-
-        Gizmos.color = new Color(1, 0, 0, 0.2f);
-        Gizmos.DrawSphere(_team1SpawnCenter, _spawnZoneSize);
-        Gizmos.DrawSphere(_team2SpawnCenter, _spawnZoneSize);
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(_team1SpawnCenter, 1f);
-        Gizmos.DrawWireSphere(_team2SpawnCenter, 1f);
-    }*/
-
     public float GetSpawnZoneSize()
     {
         return _spawnZoneSize;
@@ -244,4 +241,6 @@ public class WorldGenerator : NetworkBehaviour
                position.z >= offset &&
                position.z <= _mapHeight * _cellSize - offset;
     }
+
+
 }
