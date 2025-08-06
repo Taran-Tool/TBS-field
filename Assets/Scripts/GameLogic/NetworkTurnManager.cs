@@ -54,7 +54,7 @@ public class NetworkTurnManager : NetworkBehaviour
     }
 
     [ServerRpc]
-    public void SpendActionServerRpc(ActionType actionType)
+    public void SpendActionServerRpc(ActionTypes actionType)
     {
         if (!IsServer)
         {

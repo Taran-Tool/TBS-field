@@ -147,6 +147,14 @@ public class NetworkUnitsManager : NetworkBehaviour
         GameObject unitObj = Instantiate(config.prefab, new Vector3(position.x, groundHeight, position.z), Quaternion.identity);
 
         unitObj.tag = "Unit";
+        unitObj.layer = LayerMask.NameToLayer("Unit");
+        foreach (Transform child in unitObj.transform)
+        {
+            if (child.name!="Indicator")
+            {
+                child.gameObject.layer = LayerMask.NameToLayer("Unit");
+            }            
+        }
 
         NetworkUnit unit = unitObj.GetComponent<NetworkUnit>();
         unit.Initialize(config, player);

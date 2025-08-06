@@ -129,6 +129,7 @@ public class WorldGenerator : NetworkBehaviour
         var netObj = _ground.AddComponent<NetworkObject>();
         netObj.Spawn();
         _ground.tag = "Ground";
+        _ground.layer = LayerMask.NameToLayer("Ground");
 
         NetworkSyncHandler.instance.RegisterObjectServerRpc(netObj.NetworkObjectId, "Ground");
     }

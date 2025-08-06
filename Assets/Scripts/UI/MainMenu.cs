@@ -26,7 +26,6 @@ public class MainMenu : MonoBehaviour
     public void OnHostButtonClick()
     {
         GameNetworkManager.instance.StartHostGame();
-        NetworkSceneManager.instance.LoadGameScene();
     }
 
     public void OnJoinButtonClick()

@@ -16,7 +16,9 @@ public class NetworkSceneManager : NetworkBehaviour
     [SerializeField] private string _mainMenuScene = "MainMenu";
     [SerializeField] private string _gameScene = "GameScene";
 
-    private string _currentActiveScene;
+    private Scene _currentScene;
+
+    public Scene currentScene => _currentScene;
 
     private void Awake()
     {
@@ -41,6 +43,7 @@ public class NetworkSceneManager : NetworkBehaviour
         else
         {
             SceneManager.LoadScene(_mainMenuScene);
+            _currentScene = SceneManager.GetActiveScene();
         }
     }
 
@@ -51,6 +54,7 @@ public class NetworkSceneManager : NetworkBehaviour
         {
             NetworkManager.Singleton.SceneManager.OnLoadComplete += OnGameSceneLoaded;
             NetworkManager.Singleton.SceneManager.LoadScene(_gameScene, LoadSceneMode.Single);
+            _currentScene = SceneManager.GetActiveScene();
         }
     }
 
@@ -62,7 +66,25 @@ public class NetworkSceneManager : NetworkBehaviour
         }
         if (IsServer)
         {
+            var systems = new List<NetworkBehaviour>
+            {
+                GameSystemFactory.Create<NetworkCommandHandler>(),
+                GameSystemFactory.Create<NetworkSyncHandler>(),
+                GameSystemFactory.Create<NetworkPlayerSpawner>(),
+                GameSystemFactory.Create<WorldGenerator>(),
+                GameSystemFactory.Create<NetworkUnitsManager>(),
+                GameSystemFactory.Create<NetworkTurnManager>(),
+                GameSystemFactory.Create<NetworkActionsSystem>(),
+                GameSystemFactory.Create<NetworkVictorySystem>(),
+                GameSystemFactory.Create<CameraController>()
+            };
+
             InitializeGameWorld();
+        }
+
+        if (IsClient)
+        {
+            GameSystemFactory.Create<CameraController>();
         }
     }
 

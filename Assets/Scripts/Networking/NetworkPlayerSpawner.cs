@@ -40,7 +40,7 @@ public class NetworkPlayerSpawner : NetworkBehaviour
         GameObject playerObj = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
 
         ulong ownerClientId = team == Player.Player1 ? 0UL : 1UL;
-        playerObj.name = "" + ownerClientId;
+        playerObj.name = "Player_" + ownerClientId;
 
         NetworkObject netObj = playerObj.GetComponent<NetworkObject>();
         var networkPlayer = playerObj.GetComponent<NetworkPlayer>();
@@ -51,5 +51,17 @@ public class NetworkPlayerSpawner : NetworkBehaviour
         NetworkSyncHandler.instance.RegisterObjectServerRpc(netObj.NetworkObjectId, "Player");
 
         return networkPlayer;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+        {
+            // Если сцена уже загружена (например, при повторном подключении)
+            if (NetworkSceneManager.instance.currentScene.name == "GameScene")
+            {
+                SpawnPlayers();
+            }
+        }
     }
 }

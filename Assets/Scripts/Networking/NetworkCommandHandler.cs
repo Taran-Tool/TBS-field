@@ -10,7 +10,7 @@ public class NetworkCommandHandler : NetworkBehaviour
         get; private set;
     }
 
-    private NetworkPlayer _player1;
+    private NetworkPlayer _player1; //хост
     private NetworkPlayer _player2;
 
     private void Awake()
@@ -29,5 +29,24 @@ public class NetworkCommandHandler : NetworkBehaviour
     {
         _player1 = p1;
         _player2 = p2;
+    }
+
+    public NetworkPlayer GetPlayerByTeam(Player team)
+    {
+        return team == Player.Player1 ? _player1 : _player2;
+    }
+
+    public NetworkPlayer GetLocalPlayer()
+    {
+        if (NetworkManager.Singleton.IsHost)
+        {
+            return _player1;
+        }
+        else if (NetworkManager.Singleton.IsClient)
+        {
+            return _player2;
+        }            
+
+        return null;
     }
 }

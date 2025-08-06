@@ -32,108 +32,28 @@ public class GameNetworkManager : NetworkManager
     public void StartHostGame()
     {
         NetworkManager.Singleton.OnServerStarted += OnHostStarted;
+
         NetworkManager.Singleton.OnClientConnectedCallback += OnHostClientConnected;
-        NetworkManager.Singleton.StartHost();
+
+        NetworkManager.Singleton.StartHost();        
     }
 
     private void OnHostStarted()
     {
         Debug.Log("Host started");
+
         NetworkManager.Singleton.OnServerStarted -= OnHostStarted;
-        //создаю игровой мир
-        if (IsServer)
-        {
-            //cоздаю помощников и менеджеров
-            SpawnCommandHandler();
-            SpawnSyncHandler();
-            SpawnSceneManager();
-            SpawnPlayerSpawner();
-            SpawnWorldGenerator();
-            SpawnUnitsManager();
-            SpawnTurnManager();
-            SpawnActionSystem();
-            SpawnUnitBehaviorController();
-            SpawnVictorySystem();
-        }
-    }
-    #region Managers and Handlers
 
-    private void SpawnCommandHandler()
-    {
-        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkCommandHandler"));
-        handlerObj.name = "NetworkCommandHandler";
-        handlerObj.GetComponent<NetworkObject>().Spawn();
-    }
+        GameSystemFactory.Create<NetworkSceneManager>();
 
-    private void SpawnSyncHandler()
-    {
-        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkSyncHandler"));
-        handlerObj.name = "NetworkSyncHandler";
-        handlerObj.GetComponent<NetworkObject>().Spawn();
+        NetworkSceneManager.instance.LoadGameScene();
     }
-
-    private void SpawnSceneManager()
-    {
-        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkSceneManager"));
-        handlerObj.name = "NetworkSceneManager";
-        handlerObj.GetComponent<NetworkObject>().Spawn();
-    }
-
-    private void SpawnPlayerSpawner()
-    {
-        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkPlayerSpawner"));
-        handlerObj.name = "NetworkPlayerSpawner";
-        handlerObj.GetComponent<NetworkObject>().Spawn();
-    }
-
-    private void SpawnWorldGenerator()
-    {
-        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkWorldGenerator"));
-        handlerObj.name = "NetworkWorldGenerator";
-        handlerObj.GetComponent<NetworkObject>().Spawn();
-    }
-
-    private void SpawnUnitsManager()
-    {
-        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkUnitsManager"));
-        handlerObj.name = "NetworkUnitsManager";
-        handlerObj.GetComponent<NetworkObject>().Spawn();
-    }
-
-    private void SpawnTurnManager()
-    {
-        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkTurnManager"));
-        handlerObj.name = "NetworkTurnManager";
-        handlerObj.GetComponent<NetworkObject>().Spawn();
-    }
-
-    private void SpawnActionSystem()
-    {
-        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkActionSystem"));
-        handlerObj.name = "NetworkActionSystem";
-        handlerObj.GetComponent<NetworkObject>().Spawn();
-    }
-
-    private void SpawnUnitBehaviorController()
-    {
-        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkUnitBehaviorController"));
-        handlerObj.name = "NetworkUnitBehaviorController";
-        handlerObj.GetComponent<NetworkObject>().Spawn();
-    }
-
-    private void SpawnVictorySystem()
-    {
-        GameObject handlerObj = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkVictorySystem"));
-        handlerObj.name = "NetworkVictorySystem";
-        handlerObj.GetComponent<NetworkObject>().Spawn();
-    }
-    #endregion
 
     private void OnHostClientConnected(ulong clientId)
     {
         Debug.Log($"Client connected (Host mode): {clientId}");
         NetworkManager.Singleton.OnClientConnectedCallback -= OnHostClientConnected;
-        if (IsServer)
+        if (clientId != NetworkManager.Singleton.LocalClientId)
         {
             //начальная синхронизация
             NetworkSyncHandler.instance.RequestInitialSyncServerRpc(clientId);
@@ -167,7 +87,4 @@ public class GameNetworkManager : NetworkManager
 
         OnLocalPlayerReady.Invoke(player.Team);
     }
-
-
-
 }

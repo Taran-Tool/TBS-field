@@ -62,6 +62,14 @@ public class NetworkUnit : NetworkBehaviour
         Destroy(gameObject);
     }
 
+    public void SetPosition(Vector3 position)
+    {
+        if (IsServer)
+        {
+            SetPositionServerRpc(position);
+        }
+    }
+
     [ServerRpc]
     public void SetPositionServerRpc(Vector3 position)
     {
@@ -79,11 +87,4 @@ public class NetworkUnit : NetworkBehaviour
         transform.position = position;
     }
 
-    public void SetPosition(Vector3 position)
-    {
-        if (IsServer)
-        {
-            SetPositionServerRpc(position);
-        }
-    }
 }

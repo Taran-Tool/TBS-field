@@ -344,3 +344,20 @@
 **NetworkSyncHandler**
  - Централизованная система синхронизации состояния игры между сервером и клиентами в реальном времени
  - Пакетная обработка данных
+
+ # День восьмой
+
+ Создал/изменил:
+ - Networking
+     - GameNetworkManager
+     - NetworkSceneManager
+     - GameSystemFactory
+ - UI
+    - MainMenu
+ - GameLogic
+    - ActionTypes
+    - NetworkActionsSystem
+    - NetworkUnitSelectionSystem
+    - NetworkUnitMoveSystem
+    - NetworkUnitAttackSystem
+    - CameraController
