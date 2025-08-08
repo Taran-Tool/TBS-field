@@ -36,7 +36,7 @@ public class NetworkCommandHandler : NetworkBehaviour
         return team == Player.Player1 ? _player1 : _player2;
     }
 
-    public NetworkPlayer GetLocalPlayer()
+    public NetworkPlayer GetLocalNetworkPlayer()
     {
         if (NetworkManager.Singleton.IsHost)
         {
@@ -48,5 +48,36 @@ public class NetworkCommandHandler : NetworkBehaviour
         }            
 
         return null;
+    }
+
+    public NetworkPlayer GetHostPlayer()
+    {
+        return GameObject.FindGameObjectWithTag("HostPlayer")?.GetComponent<NetworkPlayer>();
+    }
+
+    public Player GetLocalPlayer()
+    {
+        if (NetworkManager.Singleton == null)
+        {
+            return Player.None;
+        }
+
+        return NetworkManager.Singleton.IsHost ? Player.Player1 : Player.Player2;
+    }
+
+    public bool IsLocalPlayersUnit(NetworkUnit unit)
+    {
+        if (unit == null)
+        {
+            return false;
+        }
+
+        NetworkPlayer localPlayer = GetLocalNetworkPlayer();
+        return localPlayer != null && unit.Owner == localPlayer.Team;
+    }
+
+    public bool IsUnitOwnedByLocalPlayer(NetworkUnit unit)
+    {
+        return unit != null && unit.Owner == GetLocalPlayer();
     }
 }

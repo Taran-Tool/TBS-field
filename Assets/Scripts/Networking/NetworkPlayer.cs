@@ -19,6 +19,15 @@ public class NetworkPlayer : NetworkBehaviour
         base.OnNetworkSpawn();
         if (IsOwner)
         {
+            if (NetworkManager.Singleton.IsHost)
+            {
+                gameObject.tag = "HostPlayer";
+                Team = Player.Player1;
+            }
+            else
+            {
+                Team = Player.Player2;
+            }
             //отображаю GUI игрока согласно его команде
             GameHUD.instance.SetLocalPlayer(Team);
         }

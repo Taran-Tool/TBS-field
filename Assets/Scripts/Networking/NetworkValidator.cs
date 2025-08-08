@@ -7,17 +7,54 @@ public static class NetworkValidator
 {
     public static bool ValidateAction(ulong clientId, int unitId)
     {
-        if (!IsPlayerActive(clientId))
+        // Проверяем подключен ли клиент
+        if (!NetworkManager.Singleton.ConnectedClients.ContainsKey(clientId))
         {
+            Debug.Log(11);
             return false;
         }
-            
-        var unit = NetworkUnitsManager.instance.GetUnitById(unitId);
-        var player = GetPlayer(clientId);
 
-        return unit != null &&
-               unit.Owner == player &&
-               NetworkTurnManager.instance.CurrentPlayer.Value == player;
+        // Получаем юнит
+        var unit = NetworkUnitsManager.instance.GetUnitById(unitId);
+        if (unit == null)
+        {
+            Debug.Log(22);
+            return false;
+        }
+
+        // Проверяем совпадение владельца
+        var client = NetworkManager.Singleton.ConnectedClients[clientId];
+        if (client.PlayerObject == null)
+        {
+            // Для хоста попробую найти PlayerObject через менеджер игроков
+            var hostPlayer = NetworkCommandHandler.instance?.GetHostPlayer();
+            if (hostPlayer != null && clientId == NetworkManager.Singleton.LocalClientId)
+            {
+                return ValidateUnitOwnership(hostPlayer.Team, unitId);
+            }
+
+            Debug.LogError($"PlayerObject not found for client {clientId}");
+            return false;
+        }
+
+
+        var player = client.PlayerObject.GetComponent<NetworkPlayer>();
+        return ValidateUnitOwnership(player.Team, unitId);
+    }
+
+    private static bool ValidateUnitOwnership(Player playerTeam, int unitId)
+    {
+        var unit = NetworkUnitsManager.instance.GetUnitById(unitId);
+        if (unit == null)
+        {
+            Debug.LogError($"Unit {unitId} not found");
+            return false;
+        }
+
+        bool isValid = unit.Owner == playerTeam &&
+                     NetworkTurnManager.instance.CurrentPlayer.Value == playerTeam;
+
+        return isValid;
     }
 
     public static bool ValidatePlayer(ulong clientId)

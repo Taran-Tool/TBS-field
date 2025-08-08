@@ -16,7 +16,11 @@ public class NetworkActionsSystem : NetworkBehaviour
     private NetworkUnitMoveSystem _movementSystem;
     private NetworkUnitAttackSystem _attackSystem;
 
+    public NetworkUnitAttackSystem AttackSystem => _attackSystem;
+
     public NetworkUnitSelectionSystem UnitSelectionSystem => _selectionSystem;
+
+    public Player LocalPlayer => NetworkCommandHandler.instance.GetLocalPlayer();
 
     private void Awake()
     {
@@ -41,7 +45,7 @@ public class NetworkActionsSystem : NetworkBehaviour
         _attackSystem = GetComponent<NetworkUnitAttackSystem>();
 
         _selectionSystem.SetUnitsLayer("Unit");
-        _movementSystem.SetGroundLayer("Ground");
+        _movementSystem.SetLayers("Ground", "Obstacle", "Unit");
         _movementSystem.Initialize(lineRenderer);
     }
 
@@ -56,7 +60,11 @@ public class NetworkActionsSystem : NetworkBehaviour
         if (selectedUnit != null)
         {
             _movementSystem.HandleMovement(selectedUnit);
-            _attackSystem.ShowAttackRange(selectedUnit.transform.position, selectedUnit.AttackRange);
+
+            if (!_movementSystem.HasActivePath())
+            {
+                _attackSystem.ShowAttackRange(selectedUnit.transform.position, selectedUnit.AttackRange);
+            }
         }
     }
 }

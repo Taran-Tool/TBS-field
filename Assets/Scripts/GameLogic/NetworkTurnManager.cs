@@ -49,7 +49,8 @@ public class NetworkTurnManager : NetworkBehaviour
 
     private void RandomizeFirstPlayer()
     {
-        CurrentPlayer.Value = Random.Range(0, 2) == 0 ? Player.Player1 : Player.Player2;
+        CurrentPlayer.Value = Player.Player1;
+        //CurrentPlayer.Value = Random.Range(0, 2) == 0 ? Player.Player1 : Player.Player2;
         SyncTurnState();
     }
 
@@ -161,5 +162,10 @@ public class NetworkTurnManager : NetworkBehaviour
 
         InfiniteMovement.Value = enabled;
         SyncTurnState();
+    }
+
+    public bool IsLocalPlayersTurn()
+    {
+        return CurrentPlayer.Value == NetworkCommandHandler.instance.GetLocalPlayer();
     }
 }

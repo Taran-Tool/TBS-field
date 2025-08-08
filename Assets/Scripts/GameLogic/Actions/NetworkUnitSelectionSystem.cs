@@ -11,6 +11,8 @@ public class NetworkUnitSelectionSystem : NetworkBehaviour
 
     public NetworkUnit SelectedUnit => _selectedUnit;
 
+
+
     private void Update()
     {
         if (!IsClient || !IsOwner)
@@ -29,7 +31,7 @@ public class NetworkUnitSelectionSystem : NetworkBehaviour
             if (Physics.Raycast(ray, out var hit, Mathf.Infinity, _unitLayer))
             {
                 var unit = hit.collider.GetComponent<NetworkUnit>();
-                if (unit != null && IsLocalPlayersUnit(unit))
+                if (unit != null && NetworkCommandHandler.instance.IsLocalPlayersUnit(unit))
                 {
                     SelectUnit(unit);
                 }
@@ -75,7 +77,7 @@ public class NetworkUnitSelectionSystem : NetworkBehaviour
 
     private List<NetworkUnit> GetLocalPlayerUnits()
     {
-        NetworkPlayer localPlayer = GetLocalPlayer();
+        NetworkPlayer localPlayer = NetworkCommandHandler.instance.GetLocalNetworkPlayer();
         return localPlayer != null ?
             NetworkUnitsManager.instance.GetPlayerUnits(localPlayer.Team) :
             new List<NetworkUnit>();
@@ -94,38 +96,10 @@ public class NetworkUnitSelectionSystem : NetworkBehaviour
         }        
     }
 
-    private bool IsLocalPlayersUnit(NetworkUnit unit)
-    {
-        NetworkPlayer localPlayer = GetLocalPlayer();
-        if (localPlayer == null)
-        {
-            return false;
-        }
-        return unit.Owner == localPlayer.Team;
-    }
-
-    private NetworkPlayer GetLocalPlayer()
-    {
-        // Для хоста
-        if (NetworkManager.Singleton.IsHost)
-        {
-            return NetworkCommandHandler.instance.GetPlayerByTeam(Player.Player1);
-        }
-        // Для обычного клиента
-        else if (NetworkManager.Singleton.IsClient)
-        {
-            return NetworkCommandHandler.instance.GetPlayerByTeam(Player.Player2);
-        }
-
-        return null;
-    }
-
     private void SelectUnit(NetworkUnit unit)
     {
         _selectedUnit?.SetSelected(false);
         _selectedUnit = unit;
         unit.SetSelected(true);
     }
-
-
 }
