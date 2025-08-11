@@ -7,26 +7,23 @@ public static class NetworkValidator
 {
     public static bool ValidateAction(ulong clientId, int unitId)
     {
-        // Проверяем подключен ли клиент
+        // Проверяю подключен ли клиент
         if (!NetworkManager.Singleton.ConnectedClients.ContainsKey(clientId))
         {
-            Debug.Log(11);
             return false;
         }
 
-        // Получаем юнит
+        // Получаю юнит
         var unit = NetworkUnitsManager.instance.GetUnitById(unitId);
         if (unit == null)
         {
-            Debug.Log(22);
             return false;
         }
 
-        // Проверяем совпадение владельца
+        // Проверяю совпадение владельца
         var client = NetworkManager.Singleton.ConnectedClients[clientId];
         if (client.PlayerObject == null)
         {
-            // Для хоста попробую найти PlayerObject через менеджер игроков
             var hostPlayer = NetworkCommandHandler.instance?.GetHostPlayer();
             if (hostPlayer != null && clientId == NetworkManager.Singleton.LocalClientId)
             {

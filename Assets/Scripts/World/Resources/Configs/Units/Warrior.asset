@@ -15,6 +15,6 @@ MonoBehaviour:
   unitName: Warrior
   prefab: {fileID: 1484292197086444612, guid: c6193e5d2ee02e5498a30132d8c55af6, type: 3}
   type: 0
-  moveRange: 5
+  moveRange: 6
   attackRange: 2
   scale: {x: 1, y: 1, z: 1}

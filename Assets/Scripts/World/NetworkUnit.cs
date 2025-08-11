@@ -24,7 +24,6 @@ public class NetworkUnit : NetworkBehaviour
         _config = config;
         _owner = player;
 
-        // Визуальные настройки
         _renderer.material.color = NetworkPlayer.GetTeamColor(player);
         transform.localScale = config.scale;
 
@@ -45,7 +44,8 @@ public class NetworkUnit : NetworkBehaviour
         }
 
         DestroyClientRpc();
-        if (TryGetComponent<NetworkObject>(out var netObj))
+
+        if (TryGetComponent<NetworkObject>(out var netObj) && netObj.IsSpawned )
         {
             netObj.Despawn();
         }
@@ -57,7 +57,10 @@ public class NetworkUnit : NetworkBehaviour
     {
         if (TryGetComponent<NetworkObject>(out var netObj))
         {
-            netObj.Despawn();
+            if (netObj.IsSpawned && !netObj.IsOwnedByServer)
+            {
+                netObj.Despawn();
+            }
         }
         Destroy(gameObject);
     }
@@ -86,5 +89,4 @@ public class NetworkUnit : NetworkBehaviour
     {
         transform.position = position;
     }
-
 }

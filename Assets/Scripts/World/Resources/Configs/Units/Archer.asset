@@ -15,6 +15,6 @@ MonoBehaviour:
   unitName: Archer
   prefab: {fileID: 5726449311510597882, guid: 73a86a499f45bd34eb26517a9e6f35d9, type: 3}
   type: 1
-  moveRange: 2
-  attackRange: 5
+  moveRange: 24
+  attackRange: 8
   scale: {x: 1, y: 1, z: 1}

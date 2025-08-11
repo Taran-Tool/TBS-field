@@ -1,4 +1,4 @@
-using System.Collections;
+п»їusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,7 +7,8 @@ public class Pathfinder
     private LayerMask _groundLayer;
     private LayerMask _obstacleLayer;
     private LayerMask _unitLayer;
-    private const float _cellSize = 1f;
+    private const float _cellSize = 0.5f;
+    private const float _obstacleCheckRadius = 0.25f;
 
     public Pathfinder(LayerMask groundLayer, LayerMask obstacleLayer, LayerMask unitLayer)
     {
@@ -20,7 +21,7 @@ public class Pathfinder
     {
         float moveRange = maxDistance;
 
-        //есть ли путь напрямую
+        //РµСЃР»Рё РјРµР¶РґСѓ С‚РѕС‡РєР°РјРё РЅРµС‚ РїСЂРµРїСЏС‚СЃС‚РІРёР№ 
         if (HasDirectPath(startPos, targetPos, movingUnitId))
         {
             float distance = Vector3.Distance(startPos, targetPos);
@@ -34,7 +35,7 @@ public class Pathfinder
             }
             else
             {
-                // пытаюсь двигаться максимально далеко в сторону цели
+                // РґРІРёРіР°СЋСЃСЊ РїРѕ РїСЂСЏРјРѕР№
                 Vector3 direction = (targetPos - startPos).normalized;
                 Vector3 partialTarget = startPos + direction * moveRange;
 
@@ -49,7 +50,7 @@ public class Pathfinder
             }
         }
 
-        //А*
+        //РРЅР°С‡Рµ - РїРѕРёСЃРє РїСѓС‚Рё РїРѕ ГЂ*
         List<Node> openSet = new List<Node>();
         HashSet<Node> closedSet = new HashSet<Node>();
         Dictionary<Vector3, Node> allNodes = new Dictionary<Vector3, Node>();
@@ -63,7 +64,7 @@ public class Pathfinder
         {
             Node currentNode = GetLowestFCostNode(openSet);
 
-            // если рядом с целью
+            // РµСЃР»Рё РґРёСЃС‚Р°РЅС†РёСЏ РјРµРЅСЊС€Рµ 
             if (Vector3.Distance(currentNode.Position, targetPos) <= _cellSize)
             {
                 return new PathResult
@@ -103,7 +104,7 @@ public class Pathfinder
             }
         }
 
-        //если путь не найден, проложить наиболле близкий к точке цели
+        //РµСЃР»Рё РЅРµ РЅР°С€РµС‚ РјР°СЂС€СЂСѓС‚ - РїС‹С‚Р°СЋСЃСЊ РїРѕСЃС‚СЂРѕРёС‚СЊ РјР°РєСЃРёРјР°Р»СЊРЅРѕ РїСЂРёР±Р»РёР¶РµРЅРЅС‹Р№
         Node closestNode = GetClosestNode(closedSet, targetNode);
         if (closestNode != null)
         {
@@ -127,13 +128,13 @@ public class Pathfinder
         Vector3 direction = end - start;
         float distance = direction.magnitude;
 
-        // проверка препятствий
+        // РµСЃС‚СЊ Р»Рё РїСЂРµРїСЏС‚СЃС‚РІРёСЏ
         if (Physics.Raycast(start, direction, distance, _obstacleLayer))
         {
             return false;
         }
 
-        // проверкa юнитов
+        // РµСЃС‚СЊ Р»Рё СЋРЅРёС‚С‹
         RaycastHit[] hits = Physics.SphereCastAll(
             start,
             0.4f,
@@ -172,34 +173,38 @@ public class Pathfinder
 
     private bool IsPositionWalkable(Vector3 position, int movingUnitId)
     {
-        // проверка - мы должны быть в пределах карты
+        // С‚РѕС‡РєР° РІРЅСѓС‚СЂРё РјРёСЂР° (Р·РµРјР»Рё)
         if (!WorldGenerator.instance.IsPositionInsideMap(position))
         {
             return false;
         }
 
-        // проверка препятствий 
-        if (Physics.Raycast(position + Vector3.up * 10f, Vector3.down,
-            out RaycastHit hit, 15f, _obstacleLayer))
+        Collider[] obstacles = Physics.OverlapBox(
+             position,
+             Vector3.one * _obstacleCheckRadius,
+             Quaternion.identity,
+             _obstacleLayer
+         );
+
+        foreach (var collider in obstacles)
         {
-            // Проверяем, что это не триггер
-            if (!hit.collider.isTrigger && hit.point.y >= position.y - 0.5f)
-            {
+            if (!collider.isTrigger)
                 return false;
-            }
         }
 
-        // проверка юнитов 
-        var hits = Physics.OverlapBox(position, Vector3.one * _cellSize / 2f,
-            Quaternion.identity, _unitLayer);
+        // РџСЂРѕРІРµСЂРєР° РґСЂСѓРіРёС… СЋРЅРёС‚РѕРІ
+        Collider[] units = Physics.OverlapBox(
+            position,
+            Vector3.one * _obstacleCheckRadius,
+            Quaternion.identity,
+            _unitLayer
+        );
 
-        foreach (var collider in hits)
+        foreach (var collider in units)
         {
-            if (!collider.isTrigger && collider.TryGetComponent<NetworkUnit>(out var unit) &&
-                unit.Id != movingUnitId)
-            {
+            var unit = collider.GetComponent<NetworkUnit>();
+            if (unit != null && unit.Id != movingUnitId)
                 return false;
-            }
         }
         return true;
     }
@@ -292,8 +297,8 @@ public class Pathfinder
     private class Node
     {
         public Vector3 Position;
-        public float GCost; 
-        public float HCost; 
+        public float GCost;
+        public float HCost;
         public float FCost => GCost + HCost;
         public Node Parent;
         public bool IsWalkable;

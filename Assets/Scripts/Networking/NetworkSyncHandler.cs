@@ -66,6 +66,8 @@ public class NetworkSyncHandler : NetworkBehaviour
             NetworkTurnManager.instance.ActionsRemaining.Value,
             NetworkTurnManager.instance.IsSuddenDeath.Value,
             NetworkTurnManager.instance.InfiniteMovement.Value,
+            NetworkTurnManager.instance.HasMoved.Value,
+            NetworkTurnManager.instance.HasAttacked.Value,
             CreateRpcParamsFor(clientId)
         );
 
@@ -173,6 +175,8 @@ public class NetworkSyncHandler : NetworkBehaviour
         int actionsRemaining,
         bool isSuddenDeath,
         bool infiniteMovement,
+        bool hasMoved,
+        bool hasAttacked,
         ClientRpcParams rpcParams = default)
     {
         NetworkTurnManager.instance.CurrentPlayer.Value = currentPlayer;
@@ -181,6 +185,8 @@ public class NetworkSyncHandler : NetworkBehaviour
         NetworkTurnManager.instance.ActionsRemaining.Value = actionsRemaining;
         NetworkTurnManager.instance.IsSuddenDeath.Value = isSuddenDeath;
         NetworkTurnManager.instance.InfiniteMovement.Value = infiniteMovement;
+        NetworkTurnManager.instance.HasMoved.Value = hasMoved;
+        NetworkTurnManager.instance.HasAttacked.Value = hasAttacked;
     }
 
     [ClientRpc]
@@ -195,19 +201,23 @@ public class NetworkSyncHandler : NetworkBehaviour
     [ClientRpc]
     public void SyncAttackResultClientRpc(int targetId)
     {
-        if (NetworkUnitsManager.instance.GetUnitById(targetId) is NetworkUnit target)
+        var target = NetworkUnitsManager.instance?.GetUnitById(targetId);
+        if (target == null)
         {
+            return;
+        }            
 
-            if (target.TryGetComponent<NetworkObject>(out var netObj))
+        if (target.TryGetComponent<NetworkObject>(out var netObj))
+        {
+            if (netObj.IsSpawned)
             {
                 netObj.Despawn();
             }
-            else
-            {
-                Destroy(target.gameObject);
-            }
         }
-        //TODO: добавить эффект уничтожения
+        else
+        {
+            Destroy(target.gameObject);
+        }
     }
 
     [ClientRpc]

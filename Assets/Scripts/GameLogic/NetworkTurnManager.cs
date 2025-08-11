@@ -18,6 +18,9 @@ public class NetworkTurnManager : NetworkBehaviour
     public NetworkVariable<bool> IsSuddenDeath = new(false);
     public NetworkVariable<bool> InfiniteMovement = new(false);
 
+    public NetworkVariable<bool> HasMoved = new(false);
+    public NetworkVariable<bool> HasAttacked = new(false);
+
     public GameRulesConfig Rules => _rules;
 
     [SerializeField] private GameRulesConfig _rules;
@@ -60,6 +63,23 @@ public class NetworkTurnManager : NetworkBehaviour
         if (!IsServer)
         {
             return;
+        }
+
+        // Проверяю, можно ли выполнить это действие
+        if ((actionType == ActionTypes.Move && HasMoved.Value) ||
+            (actionType == ActionTypes.Attack && HasAttacked.Value))
+        {
+            return;
+        }
+
+        // Отмечаю выполненное действие
+        if (actionType == ActionTypes.Move)
+        {
+            HasMoved.Value = true;
+        }
+        else if (actionType == ActionTypes.Attack)
+        {
+            HasAttacked.Value = true;
         }
 
         ActionsRemaining.Value--;
@@ -123,7 +143,9 @@ public class NetworkTurnManager : NetworkBehaviour
     private void ResetTurnState()
     {
         TurnTimer.Value = _rules.turnDuration;
-        ActionsRemaining.Value = 2; // 2 действия за ход
+        ActionsRemaining.Value = 2; // 2 действия за ход, для перспективы
+        HasMoved.Value = false;
+        HasAttacked.Value = false;
     }
 
     private void SyncTurnState()
@@ -134,7 +156,9 @@ public class NetworkTurnManager : NetworkBehaviour
             TurnTimer.Value,
             ActionsRemaining.Value,
             IsSuddenDeath.Value,
-            InfiniteMovement.Value
+            InfiniteMovement.Value,
+            HasMoved.Value,   
+            HasAttacked.Value
         );
     }
 

@@ -36,7 +36,9 @@ public class Turn15DrawCondition:IVictoryCondition
             var p2Units = NetworkUnitsManager.instance.GetPlayerUnits(Player.Player2).Count;
 
             if (p1Units != p2Units)
+            {
                 return p1Units > p2Units ? GameResult.Player1Win : GameResult.Player2Win;
+            }
 
             NetworkTurnManager.instance.SetInfiniteMovementServerRpc(true);
         }

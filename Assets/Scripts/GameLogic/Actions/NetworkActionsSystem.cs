@@ -57,14 +57,26 @@ public class NetworkActionsSystem : NetworkBehaviour
         }            
 
         var selectedUnit = _selectionSystem.SelectedUnit;
-        if (selectedUnit != null)
+        if (selectedUnit != null && selectedUnit.gameObject != null)
         {
             _movementSystem.HandleMovement(selectedUnit);
 
             if (!_movementSystem.HasActivePath())
             {
-                _attackSystem.ShowAttackRange(selectedUnit.transform.position, selectedUnit.AttackRange);
+                _attackSystem.HandleAttackInput(selectedUnit);
+                _attackSystem.ShowAttackRange(
+                    selectedUnit.transform.position,
+                    selectedUnit.AttackRange
+                );
             }
+            else
+            {
+                _attackSystem.ClearTargets();
+            }
+        }
+        else
+        {
+            _attackSystem.ClearTargets();
         }
     }
 }

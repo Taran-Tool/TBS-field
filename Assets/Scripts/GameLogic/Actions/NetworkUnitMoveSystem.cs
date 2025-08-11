@@ -284,7 +284,8 @@ public class NetworkUnitMoveSystem : NetworkBehaviour
 
         return unit.Owner == NetworkActionsSystem.instance.LocalPlayer &&
            (NetworkTurnManager.instance.ActionsRemaining.Value > 0 ||
-            NetworkTurnManager.instance.InfiniteMovement.Value);
+            NetworkTurnManager.instance.InfiniteMovement.Value) && 
+            !NetworkTurnManager.instance.HasMoved.Value;
     }
 
     public bool HasActivePath()

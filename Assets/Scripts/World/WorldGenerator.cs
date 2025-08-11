@@ -197,7 +197,10 @@ public class WorldGenerator : NetworkBehaviour
         var netObj = obstacle.AddComponent<NetworkObject>();
         netObj.Spawn();
         obstacle.tag = "Obstacle";
+        obstacle.layer = LayerMask.NameToLayer("Obstacle");
+
         obstacle.name = $"{config.type}_{NetworkObjectId}";
+
 
         NetworkSyncHandler.instance.RegisterObjectServerRpc(netObj.NetworkObjectId, "Obstacle");
     }

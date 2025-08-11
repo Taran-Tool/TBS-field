@@ -204,4 +204,16 @@ public class NetworkUnitsManager : NetworkBehaviour
     {
         return _unitsById.Values;
     }
+
+    public void RemoveUnit(int unitId)
+    {
+        if (_unitsById.TryGetValue(unitId, out var unit))
+        {
+            foreach (var playerUnits in _playerUnits.Values)
+            {
+                playerUnits.Remove(unit);
+            }
+            _unitsById.Remove(unitId);
+        }
+    }
 }
