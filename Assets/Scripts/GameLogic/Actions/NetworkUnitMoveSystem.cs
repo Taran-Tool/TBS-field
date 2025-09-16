@@ -68,10 +68,9 @@ public class NetworkUnitMoveSystem : NetworkBehaviour
 
         if (Input.GetMouseButtonDown(1))
         {
-
             HandleRightClick(selectedUnit);
         }
-        else if (Input.GetMouseButtonDown(0))
+        else if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.S))
         {
             ClearPath();
         }
@@ -98,10 +97,12 @@ public class NetworkUnitMoveSystem : NetworkBehaviour
 
     private void PreviewPath(NetworkUnit unit, Vector3 targetPoint)
     {
+        float moveRange = GetEffectiveMoveRange(unit);
+
         _currentPath = _pathfinder.FindPath(
             unit.transform.position,
             targetPoint,
-            unit.MoveRange,
+            moveRange,
             unit.Id
         );
 
@@ -116,14 +117,13 @@ public class NetworkUnitMoveSystem : NetworkBehaviour
             return;
         }
 
-        if (!NetworkCommandHandler.instance.IsUnitOwnedByLocalPlayer(unit))
+        if (!NetworkPlayersManager.instance.IsUnitOwnedByLocalPlayer(unit))
         {
             return;
         }
 
         if (Vector3.Distance(unit.transform.position, targetPoint) < 0.5f)
         {
-            Debug.Log(2);
             ClearPath();
             return;
         }
@@ -137,7 +137,7 @@ public class NetworkUnitMoveSystem : NetworkBehaviour
                 unit.Id
             );
         }
-
+        
         if (_currentPath.Path.Count > 0)
         {
             MoveUnitServerRpc(unit.Id, 
@@ -161,8 +161,10 @@ public class NetworkUnitMoveSystem : NetworkBehaviour
             return;
         }
 
+        Vector3 correctedPoint = _currentPath.Path[^1] + new Vector3(0, unit.transform.localScale.y, 0);
+        
         Vector3 attackRangePos = (_currentPath.Path != null && _currentPath.Path.Count > 0)
-        ? _currentPath.Path[^1]
+        ? correctedPoint
         : unit.transform.position;
 
         NetworkActionsSystem.instance.AttackSystem.ShowAttackRange(
@@ -195,10 +197,9 @@ public class NetworkUnitMoveSystem : NetworkBehaviour
         _pathLineRenderer.enabled = true;
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void MoveUnitServerRpc(int unitId, Vector3 target, ServerRpcParams rpcParams = default)
     {
-       
         if (!IsServer)
         {
             return;
@@ -210,16 +211,17 @@ public class NetworkUnitMoveSystem : NetworkBehaviour
             return;
         }
 
-        if (!NetworkValidator.ValidateAction(rpcParams.Receive.SenderClientId, unitId))
+        if (!NetworkValidator.ValidateMove(rpcParams.Receive.SenderClientId, unitId))
         {
-            Debug.Log(3);
             return;
         }
+
+        float moveRange = GetEffectiveMoveRange(unit);
 
         Pathfinder.PathResult validatedPath = _pathfinder.FindPath(
             unit.Position,
             target,
-            unit.MoveRange,
+            moveRange,
             unitId
         );
 
@@ -291,5 +293,15 @@ public class NetworkUnitMoveSystem : NetworkBehaviour
     public bool HasActivePath()
     {
         return _currentPath.Path != null && _currentPath.Path.Count > 0;
+    }
+
+    private float GetEffectiveMoveRange(NetworkUnit unit)
+    {
+        if (NetworkTurnManager.instance != null &&
+            NetworkTurnManager.instance.InfiniteMovement.Value)
+        {
+            return unit.MoveRange + 1000f;
+        }
+        return unit.MoveRange;
     }
 }

@@ -33,12 +33,11 @@ public class NetworkSceneManager : NetworkBehaviour
         }
     }
 
-    //главное меню
     public void LoadMainMenu()
     {
         if (IsServer)
         {
-            NetworkManager.Singleton.SceneManager.LoadScene(_mainMenuScene, LoadSceneMode.Single);
+            GameNetworkManager.instance.SceneManager.LoadScene(_mainMenuScene, LoadSceneMode.Single);
         }
         else
         {
@@ -47,13 +46,12 @@ public class NetworkSceneManager : NetworkBehaviour
         }
     }
 
-    //сетевая загрузка игровой сцены
     public void LoadGameScene()
     {
         if (IsServer)
-        {
-            NetworkManager.Singleton.SceneManager.OnLoadComplete += OnGameSceneLoaded;
-            NetworkManager.Singleton.SceneManager.LoadScene(_gameScene, LoadSceneMode.Single);
+        {            
+            GameNetworkManager.instance.SceneManager.LoadScene(_gameScene, LoadSceneMode.Single);
+            GameNetworkManager.instance.SceneManager.OnLoadComplete += OnGameSceneLoaded;
             _currentScene = SceneManager.GetActiveScene();
         }
     }
@@ -62,43 +60,83 @@ public class NetworkSceneManager : NetworkBehaviour
     {
         if (sceneName == _gameScene)
         {
-            NetworkManager.Singleton.SceneManager.OnLoadComplete -= OnGameSceneLoaded;
-        }
-        if (IsServer)
-        {
-            var systems = new List<NetworkBehaviour>
+            GameNetworkManager.instance.SceneManager.OnLoadComplete -= OnGameSceneLoaded;
+            
+            if (IsServer)
             {
-                GameSystemFactory.Create<NetworkCommandHandler>(),
-                GameSystemFactory.Create<NetworkSyncHandler>(),
-                GameSystemFactory.Create<NetworkPlayerSpawner>(),
-                GameSystemFactory.Create<WorldGenerator>(),
-                GameSystemFactory.Create<NetworkUnitsManager>(),
-                GameSystemFactory.Create<NetworkTurnManager>(),
-                GameSystemFactory.Create<NetworkActionsSystem>(),
-                GameSystemFactory.Create<NetworkVictorySystem>(),
-                GameSystemFactory.Create<CameraController>()
-            };
+                _currentScene = SceneManager.GetActiveScene();
 
-            InitializeGameWorld();
-        }
+                CreateBaseSystems();                              
 
-        if (IsClient)
-        {
-            GameSystemFactory.Create<CameraController>();
+                Debug.Log("SceneM: generating map");
+                WorldGenerator.instance.GenerateMap();
+
+                Debug.Log($"SceneM: Spawning host player: {clientId}");
+                NetworkPlayerSpawner.instance.SpawnHostPlayer();
+
+                Debug.Log("SceneM: Waiting for remote client connect!");
+                GameNetworkManager.instance.OnClientConnectedCallback += OnClientConnected;
+            }
         }
     }
 
-    private void InitializeGameWorld()
+    private void OnClientConnected(ulong clientId)
     {
-        // 1. Генерация мира
-        WorldGenerator.instance.GenerateMap();
-        // 2. Спавн игроков
-        NetworkPlayerSpawner.instance.SpawnPlayers();
-        // 3. Спавн юнитов
-        NetworkUnitsManager.instance.SpawnArmies();
-        // 3. Инициализация систем
-        NetworkTurnManager.instance.InitializeServerRpc("Default");
-        Debug.Log("Game world initialized on server");
+        if (IsServer && clientId != NetworkManager.ServerClientId)
+        {
+            Debug.Log($"SceneM: Spawning client player: {clientId}");
+            NetworkPlayerSpawner.instance.SpawnClientPlayer(clientId);
+
+            InitPlayersSystems();
+
+            GameNetworkManager.instance.OnClientConnectedCallback -= OnClientConnected;
+        }
+    }
+
+    private void CreateBaseSystems()
+    {
+        if (!IsServer)
+        {
+            return;
+        }
+
+        Debug.Log("SceneM: Creating base systems");
+        GameSystemFactory.Create<NetworkPlayersManager>();
+        GameSystemFactory.Create<NetworkPlayerSpawner>();
+        
+        GameSystemFactory.Create<NetworkSyncHandler>();
+        GameSystemFactory.Create<WorldGenerator>();
+        GameSystemFactory.Create<NetworkUnitsManager>();
+        GameSystemFactory.Create<NetworkTurnManager>();
+        GameSystemFactory.Create<NetworkActionsSystem>();
+        GameSystemFactory.Create<NetworkVictorySystem>();
+    }
+
+    private void InitPlayersSystems()
+    {
+        if (!IsServer)
+        {
+            return;
+        }
+
+        Debug.Log("SceneM: Initializing game systems...");
+
+        if (NetworkUnitsManager.instance != null)
+        {
+            NetworkUnitsManager.instance.SpawnArmies();
+        }
+
+        if (NetworkTurnManager.instance != null)
+        {
+            NetworkTurnManager.instance.InitializeServerRpc("Default");
+        }
+
+        if (NetworkVictorySystem.instance != null)
+        {
+            NetworkVictorySystem.instance.InitializeServerRpc("Default");
+        }
+
+        Debug.Log("SceneM: Game systems initialized successfully!");
     }
 
     private void OnDrawGizmos()
@@ -108,7 +146,6 @@ public class NetworkSceneManager : NetworkBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawSphere(spawnPoints[Player.Player1], 10f);
         Gizmos.color = Color.blue;
-        Gizmos.DrawSphere(spawnPoints[Player.Player2], 10f);
-        
+        Gizmos.DrawSphere(spawnPoints[Player.Player2], 10f);   
     }
 }

@@ -27,6 +27,7 @@ public class WorldGenerator : NetworkBehaviour
     [SerializeField] private float _cellSize = 1f;
     [SerializeField] private float _spawnZoneSize = 10f;
     [SerializeField] private Material _groundMaterial;
+    [SerializeField] GameObject groundPrefab;
 
     [Header("Obstacles")]
     [SerializeField] private List<ObstacleConfig> _obstacleConfigs;
@@ -36,18 +37,30 @@ public class WorldGenerator : NetworkBehaviour
     private Vector3 _team2SpawnCenter;
     private GameObject _ground;
 
+    public NetworkVariable<Vector3> Team1SpawnCenter = new();
+    public NetworkVariable<Vector3> Team2SpawnCenter = new();
+
+    public NetworkVariable<Color> GroundColor = new();
+
     private void Awake()
     {
         if (instance == null)
+        {
             instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
         else
+        {
             Destroy(gameObject);
+        }
     }
 
     public void GenerateMap()
     {
         if (!IsServer)
+        {
             return;
+        }            
 
         ClearMap();
         RandomizeSpawnZoneType();
@@ -104,11 +117,14 @@ public class WorldGenerator : NetworkBehaviour
             );
             break;
         }
+        Team1SpawnCenter.Value = _team1SpawnCenter;
+        Team2SpawnCenter.Value = _team2SpawnCenter;
     }
 
     private void CreateGround()
     {
-        _ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        _ground = Instantiate(groundPrefab);
+
         _ground.name = "Ground";
         _ground.transform.position = new Vector3(
             _mapWidth * _cellSize / 2f,
@@ -121,15 +137,12 @@ public class WorldGenerator : NetworkBehaviour
             _mapHeight * _cellSize
         );
 
-        if (_groundMaterial != null)
-        {
-            _ground.GetComponent<Renderer>().material = _groundMaterial;
-        }
-
-        var netObj = _ground.AddComponent<NetworkObject>();
-        netObj.Spawn();
         _ground.tag = "Ground";
         _ground.layer = LayerMask.NameToLayer("Ground");
+
+        var netObj = _ground.GetComponent<NetworkObject>();
+        
+        netObj.Spawn();
 
         NetworkSyncHandler.instance.RegisterObjectServerRpc(netObj.NetworkObjectId, "Ground");
     }
@@ -187,20 +200,18 @@ public class WorldGenerator : NetworkBehaviour
 
     private void CreateObstacle(ObstacleConfig config, Vector3 position, Quaternion rotation)
     {
-        var obstacle = GameObject.CreatePrimitive(config.primitiveType);
+        GameObject obstacle = Instantiate(config.prefab);
         obstacle.transform.position = position + Vector3.up * (config.scale.y / 2f);
         obstacle.transform.localScale = config.scale;
         obstacle.transform.rotation = rotation;
 
-        obstacle.GetComponent<Renderer>().material.color = config.color;
         obstacle.GetComponent<Collider>().isTrigger = false;
-        var netObj = obstacle.AddComponent<NetworkObject>();
-        netObj.Spawn();
+        var netObj = obstacle.GetComponent<NetworkObject>();
+
         obstacle.tag = "Obstacle";
         obstacle.layer = LayerMask.NameToLayer("Obstacle");
-
         obstacle.name = $"{config.type}_{NetworkObjectId}";
-
+        netObj.Spawn();
 
         NetworkSyncHandler.instance.RegisterObjectServerRpc(netObj.NetworkObjectId, "Obstacle");
     }
@@ -232,11 +243,6 @@ public class WorldGenerator : NetworkBehaviour
         };
     }
 
-    public float GetSpawnZoneSize()
-    {
-        return _spawnZoneSize;
-    }
-
     public bool IsPositionInsideMap(Vector3 position)
     {
         float offset = 1f;
@@ -245,6 +251,5 @@ public class WorldGenerator : NetworkBehaviour
                position.z >= offset &&
                position.z <= _mapHeight * _cellSize - offset;
     }
-
 
 }

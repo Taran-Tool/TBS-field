@@ -6,21 +6,23 @@ using Unity.Netcode.Transports.UTP;
 using UnityEngine.Events;
 using System;
 
-public class GameNetworkManager : NetworkManager
+public class GameNetworkManager:NetworkManager
 {
     public static GameNetworkManager instance
     {
         get; private set;
     }
-
     public UnityEvent<Player> OnLocalPlayerReady = new();
 
-    //singleton
+    private bool _isClientConnected = false;
+    public bool isClientConnected => _isClientConnected;
+
     private void Awake()
     {
         if (instance == null)
         {
             instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -28,63 +30,46 @@ public class GameNetworkManager : NetworkManager
         }
     }
 
-    //создаю хост
+    //Старт хоста
     public void StartHostGame()
     {
-        NetworkManager.Singleton.OnServerStarted += OnHostStarted;
-
-        NetworkManager.Singleton.OnClientConnectedCallback += OnHostClientConnected;
-
-        NetworkManager.Singleton.StartHost();        
+        OnServerStarted += OnHostStarted;
+        OnClientConnectedCallback += OnClientConnected;
+        StartHost();
     }
 
     private void OnHostStarted()
     {
-        Debug.Log("Host started");
-
-        NetworkManager.Singleton.OnServerStarted -= OnHostStarted;
-
-        GameSystemFactory.Create<NetworkSceneManager>();
-
+        Debug.Log("GNM: Host started");
+        OnServerStarted -= OnHostStarted;
         NetworkSceneManager.instance.LoadGameScene();
     }
 
-    private void OnHostClientConnected(ulong clientId)
-    {
-        Debug.Log($"Client connected (Host mode): {clientId}");
-        NetworkManager.Singleton.OnClientConnectedCallback -= OnHostClientConnected;
-        if (clientId != NetworkManager.Singleton.LocalClientId)
-        {
-            //начальная синхронизация
-            NetworkSyncHandler.instance.RequestInitialSyncServerRpc(clientId);
-        }
-    }
-
+    //Старт клиента
     public void JoinGame(string ipAddress)
     {
-        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
-        NetworkManager.Singleton.NetworkConfig.ConnectionData = System.Text.Encoding.ASCII.GetBytes("player_data");
-        NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(ipAddress, 7777);
-        NetworkManager.Singleton.StartClient();
+        OnClientConnectedCallback += OnClientConnected;
+        NetworkConfig.ConnectionData = System.Text.Encoding.ASCII.GetBytes("player_data");
+        GetComponent<UnityTransport>().SetConnectionData(ipAddress, 7777);
+        StartClient();
+        NetworkSceneManager.instance.LoadGameScene();
     }
 
     private void OnClientConnected(ulong clientId)
     {
-        Debug.Log($"Client connected (Client mode): {clientId}");
-        NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+        Debug.Log($"GNM: Client connected: {clientId} (IsHost: {IsHost}, IsServer: {IsServer})");
 
-        if (IsClient && !IsServer)
+        if (clientId == LocalClientId && IsServer)
         {
-            RegisterLocalPlayer();
+            if (IsHost)
+            {
+                Debug.Log($"GNM: Local client connected: {clientId}");
+            }            
         }
-    }
-
-    private void RegisterLocalPlayer()
-    {
-        var localClienId = NetworkManager.Singleton.LocalClientId;
-        var playerObj = NetworkManager.Singleton.ConnectedClients[localClienId].PlayerObject;
-        var player = playerObj.GetComponent<NetworkPlayer>();
-
-        OnLocalPlayerReady.Invoke(player.Team);
+        if (clientId != LocalClientId && IsServer)
+        {
+            Debug.Log($"GNM: Remote client connected: {clientId}");
+            _isClientConnected = true;
+        }        
     }
 }

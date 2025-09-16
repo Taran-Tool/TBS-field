@@ -119,6 +119,7 @@ GameObject:
   - component: {fileID: 2075393683028959916}
   - component: {fileID: 7418800362449407185}
   - component: {fileID: 8165539094922939535}
+  - component: {fileID: 4915028844521360084}
   m_Layer: 0
   m_Name: Archer
   m_TagString: Untagged
@@ -171,7 +172,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: c0adfaf65c6a88346bfd6a3c160d6595, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -228,7 +229,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 384148941
+  GlobalObjectIdHash: 2467932207
   InScenePlacedSourceGlobalObjectIdHash: 2467932207
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -251,6 +252,55 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _renderer: {fileID: 6962854560522304524}
   _selectionIndicator: {fileID: 52472241308159867}
+--- !u!114 &4915028844521360084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5726449311510597882}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12855172980f5f74abaa634f67bd2d5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObjectTag:
+    m_InternalValue:
+      utf8LengthInBytes: 0
+      bytes:
+        offset0000:
+          byte0000: 0
+          byte0001: 0
+          byte0002: 0
+          byte0003: 0
+          byte0004: 0
+          byte0005: 0
+          byte0006: 0
+          byte0007: 0
+          byte0008: 0
+          byte0009: 0
+          byte0010: 0
+          byte0011: 0
+          byte0012: 0
+          byte0013: 0
+          byte0014: 0
+          byte0015: 0
+        byte0016: 0
+        byte0017: 0
+        byte0018: 0
+        byte0019: 0
+        byte0020: 0
+        byte0021: 0
+        byte0022: 0
+        byte0023: 0
+        byte0024: 0
+        byte0025: 0
+        byte0026: 0
+        byte0027: 0
+        byte0028: 0
+        byte0029: 0
+  ObjectLayer:
+    m_InternalValue: 0
 --- !u!1 &9161035535067047208
 GameObject:
   m_ObjectHideFlags: 0

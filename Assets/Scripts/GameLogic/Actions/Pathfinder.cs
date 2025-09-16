@@ -229,7 +229,6 @@ public class Pathfinder
                     neighbor = GetNode(neighborPos, movingUnitId);
                     allNodes[neighborPos] = neighbor;
                 }
-
                 neighbors.Add(neighbor);
             }
         }
@@ -264,7 +263,6 @@ public class Pathfinder
                 closestDistance = dist;
             }
         }
-
         return closest;
     }
 
@@ -302,7 +300,6 @@ public class Pathfinder
         public float FCost => GCost + HCost;
         public Node Parent;
         public bool IsWalkable;
-
         public Node(Vector3 position)
         {
             Position = position;

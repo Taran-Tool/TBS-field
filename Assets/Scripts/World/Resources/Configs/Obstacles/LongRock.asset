@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: LongRock
   m_EditorClassIdentifier: 
   type: 0
-  primitiveType: 3
+  prefab: {fileID: 4892255227969662073, guid: b5752d0c1aae79c44a007c7728a9abed, type: 3}
   color: {r: 0.3962264, g: 0.29215443, b: 0.22988608, a: 1}
   scale: {x: 2, y: 2, z: 5}
   minCount: 3

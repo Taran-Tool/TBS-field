@@ -9,8 +9,7 @@ public class ObstacleConfig : ScriptableObject
     }
 
     public ObstacleType type;
-    public PrimitiveType primitiveType = PrimitiveType.Cube;
-    public Color color = Color.gray;
+    public GameObject prefab;
     public Vector3 scale = Vector3.one;
     [Range(1, 10)] public int minCount = 5;
     [Range(1, 20)] public int maxCount = 10;

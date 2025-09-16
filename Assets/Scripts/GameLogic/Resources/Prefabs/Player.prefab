@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3246017401981167541
+--- !u!1 &5951494850774775065
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,44 +8,45 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5528187337910918939}
-  - component: {fileID: 6044796512575735008}
-  - component: {fileID: 5450549456146392434}
+  - component: {fileID: 4347021275953730324}
+  - component: {fileID: 4979587698390712039}
+  - component: {fileID: 6039051437357071639}
+  - component: {fileID: 8873723594827049399}
   m_Layer: 0
-  m_Name: CameraController
+  m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5528187337910918939
+--- !u!4 &4347021275953730324
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3246017401981167541}
+  m_GameObject: {fileID: 5951494850774775065}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.0289516, y: 27.29555, z: 7.0209637}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6044796512575735008
+--- !u!114 &4979587698390712039
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3246017401981167541}
+  m_GameObject: {fileID: 5951494850774775065}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 4194719988
+  GlobalObjectIdHash: 531447569
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -54,22 +55,30 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
---- !u!114 &5450549456146392434
+--- !u!114 &6039051437357071639
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3246017401981167541}
+  m_GameObject: {fileID: 5951494850774775065}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7ed8eedbc90aefc4092a79e657911941, type: 3}
+  m_Script: {fileID: 11500000, guid: 605a518af1585d54c96fa3a33110be5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _virtualCamera: {fileID: 0}
-  _moveSpeed: 10
-  _rotationSpeed: 100
-  _zoomSpeed: 5
-  _minZoom: 5
-  _maxZoom: 20
-  _focusSmoothTime: 0.3
+  team:
+    m_InternalValue: 0
+  cameraControllerPrefab: {fileID: 3246017401981167541, guid: a5b932964cf64b545bfbb57a5857c6cd, type: 3}
+--- !u!114 &8873723594827049399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5951494850774775065}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a0faf5e48104264bb8be459dfa6833d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

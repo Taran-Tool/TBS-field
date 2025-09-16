@@ -26,23 +26,24 @@ public class UnitCountVictoryCondition : IVictoryCondition
     }
 }
 
-public class Turn15DrawCondition:IVictoryCondition
+public class Turn15InfiniteMoves:IVictoryCondition
 {
     public GameResult? CheckCondition()
     {
-        if (NetworkTurnManager.instance.CurrentTurn.Value >= NetworkTurnManager.instance.Rules.suddenDeathTurn)
+        if (!NetworkTurnManager.instance.infiniteMode.Value)
         {
-            var p1Units = NetworkUnitsManager.instance.GetPlayerUnits(Player.Player1).Count;
-            var p2Units = NetworkUnitsManager.instance.GetPlayerUnits(Player.Player2).Count;
-
-            if (p1Units != p2Units)
-            {
-                return p1Units > p2Units ? GameResult.Player1Win : GameResult.Player2Win;
-            }
-
-            NetworkTurnManager.instance.SetInfiniteMovementServerRpc(true);
+            return null;
         }
-        return null;
+
+        var p1Units = NetworkUnitsManager.instance.GetPlayerUnits(Player.Player1).Count;
+        var p2Units = NetworkUnitsManager.instance.GetPlayerUnits(Player.Player2).Count;
+
+        if (p1Units != p2Units)
+        {
+            return p1Units > p2Units ? GameResult.Player1Win : GameResult.Player2Win;
+        }
+        
+        return GameResult.InfiniteMoves;
     }
 }
 
@@ -51,5 +52,5 @@ public enum GameResult
     None,
     Player1Win,
     Player2Win,
-    Draw
+    InfiniteMoves
 }

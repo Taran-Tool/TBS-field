@@ -20,7 +20,9 @@ public class NetworkActionsSystem : NetworkBehaviour
 
     public NetworkUnitSelectionSystem UnitSelectionSystem => _selectionSystem;
 
-    public Player LocalPlayer => NetworkCommandHandler.instance.GetLocalPlayer();
+    public Player LocalPlayer => NetworkPlayersManager.instance.GetLocalPlayer();
+
+    private NetworkUnit _lastSelectedUnit;
 
     private void Awake()
     {
@@ -51,32 +53,46 @@ public class NetworkActionsSystem : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsClient || !IsOwner)
+        if (!IsClient)
         {
             return;
-        }            
+        }
 
         var selectedUnit = _selectionSystem.SelectedUnit;
+        if (_lastSelectedUnit != _selectionSystem.SelectedUnit)
+        {
+            _lastSelectedUnit = _selectionSystem.SelectedUnit;
+            _attackSystem.ShowAttackRange(
+                                            _lastSelectedUnit.transform.position,
+                                            _lastSelectedUnit.AttackRange
+                                         );
+        }
+
         if (selectedUnit != null && selectedUnit.gameObject != null)
         {
-            _movementSystem.HandleMovement(selectedUnit);
+            if (NetworkPlayersManager.instance.IsUnitOwnedByLocalPlayer(selectedUnit))
+            {
+                _movementSystem.HandleMovement(selectedUnit);
 
-            if (!_movementSystem.HasActivePath())
-            {
                 _attackSystem.HandleAttackInput(selectedUnit);
-                _attackSystem.ShowAttackRange(
-                    selectedUnit.transform.position,
-                    selectedUnit.AttackRange
-                );
-            }
-            else
-            {
-                _attackSystem.ClearTargets();
-            }
+
+                if (!_movementSystem.HasActivePath())
+                {                    
+                    _attackSystem.ShowAttackRange(
+                        selectedUnit.transform.position,
+                        selectedUnit.AttackRange
+                    );
+                }
+                else
+                {
+                    _attackSystem.ClearTargets();
+                }
+            }            
         }
         else
         {
             _attackSystem.ClearTargets();
+            _attackSystem.HideAttackRange();
         }
     }
 }

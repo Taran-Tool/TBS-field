@@ -19,6 +19,7 @@ public class NetworkSyncHandler : NetworkBehaviour
         if (instance == null)
         {
             instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -27,6 +28,7 @@ public class NetworkSyncHandler : NetworkBehaviour
     }
 
     #region Initial Sync Methods
+    //Старый механизм
     [ServerRpc]
     public void RequestInitialSyncServerRpc(ulong clientId)
     {
@@ -58,24 +60,12 @@ public class NetworkSyncHandler : NetworkBehaviour
         var units = GameObject.FindGameObjectsWithTag("Unit");
         yield return StartCoroutine(SyncObjectsBatch(units, clientId, "Unit"));
 
-        // 3. Синхронизация состояния игры
-        SyncGameStateClientRpc(
-            NetworkTurnManager.instance.CurrentPlayer.Value,
-            NetworkTurnManager.instance.CurrentTurn.Value,
-            NetworkTurnManager.instance.TurnTimer.Value,
-            NetworkTurnManager.instance.ActionsRemaining.Value,
-            NetworkTurnManager.instance.IsSuddenDeath.Value,
-            NetworkTurnManager.instance.InfiniteMovement.Value,
-            NetworkTurnManager.instance.HasMoved.Value,
-            NetworkTurnManager.instance.HasAttacked.Value,
-            CreateRpcParamsFor(clientId)
-        );
-
-        // 4. Помечаем синхронизацию как завершенную
+        // 3. Помечаем синхронизацию как завершенную
         CompleteInitialSyncClientRpc(CreateRpcParamsFor(clientId));
 
         Debug.Log($"Initial sync completed for client {clientId}");
     }
+
 
     [ClientRpc]
     private void SyncGroundClientRpc(Vector3 position, Vector3 scale, ClientRpcParams rpcParams = default)
@@ -119,7 +109,7 @@ public class NetworkSyncHandler : NetworkBehaviour
     {
         foreach (var objectId in networkObjectIds)
         {
-            if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(objectId, out var netObj))
+            if (GameNetworkManager.instance.SpawnManager.SpawnedObjects.TryGetValue(objectId, out var netObj))
             {
                 if (!_pendingSyncObjects.ContainsKey(objectId))
                 {
@@ -146,7 +136,7 @@ public class NetworkSyncHandler : NetworkBehaviour
             return;
         }            
 
-        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(objectId, out var netObj))
+        if (GameNetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(objectId, out var netObj))
         {
             RegisterObjectClientRpc(objectId, objectType);
         }
@@ -156,7 +146,7 @@ public class NetworkSyncHandler : NetworkBehaviour
     private void RegisterObjectClientRpc(ulong objectId, string objectType)
     {
         if (_isInitialSyncComplete &&
-            NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(objectId, out var netObj))
+            GameNetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(objectId, out var netObj))
         {
             if (!_pendingSyncObjects.ContainsKey(objectId))
             {
@@ -167,27 +157,6 @@ public class NetworkSyncHandler : NetworkBehaviour
     #endregion
 
     #region Game State Sync
-    [ClientRpc]
-    public void SyncGameStateClientRpc(
-        Player currentPlayer,
-        int currentTurn,
-        float timer,
-        int actionsRemaining,
-        bool isSuddenDeath,
-        bool infiniteMovement,
-        bool hasMoved,
-        bool hasAttacked,
-        ClientRpcParams rpcParams = default)
-    {
-        NetworkTurnManager.instance.CurrentPlayer.Value = currentPlayer;
-        NetworkTurnManager.instance.CurrentTurn.Value = currentTurn;
-        NetworkTurnManager.instance.TurnTimer.Value = timer;
-        NetworkTurnManager.instance.ActionsRemaining.Value = actionsRemaining;
-        NetworkTurnManager.instance.IsSuddenDeath.Value = isSuddenDeath;
-        NetworkTurnManager.instance.InfiniteMovement.Value = infiniteMovement;
-        NetworkTurnManager.instance.HasMoved.Value = hasMoved;
-        NetworkTurnManager.instance.HasAttacked.Value = hasAttacked;
-    }
 
     [ClientRpc]
     public void SyncUnitPositionClientRpc(int unitId, Vector3 position)
@@ -223,21 +192,13 @@ public class NetworkSyncHandler : NetworkBehaviour
     [ClientRpc]
     public void AnnounceVictoryClientRpc(GameResult result)
     {
-        // Реализация отображения победы
-        switch (result)
-        {
-            case GameResult.Player1Win:
-            Debug.Log("Player 1 Wins!");
-            break;
-            case GameResult.Player2Win:
-            Debug.Log("Player 2 Wins!");
-            break;
-            case GameResult.Draw:
-            Debug.Log("Game ended in Draw!");
-            break;
-        }
+        bool isHost = NetworkPlayersManager.instance.GetHostPlayer()?.Team ==
+                 NetworkPlayersManager.instance.GetLocalPlayer();
 
-        // GameUI.Instance.ShowVictoryScreen(result);
+        if (GameHUD.instance != null)
+        {
+            GameHUD.instance.ShowVictoryPanel(result, isHost);
+        }
     }
     #endregion
 
@@ -249,23 +210,5 @@ public class NetworkSyncHandler : NetworkBehaviour
             Send = new ClientRpcSendParams { TargetClientIds = new[] { clientId } }
         };
     }
-
-    public bool IsObjectSynced(ulong objectId)
-    {
-        return _pendingSyncObjects.ContainsKey(objectId) || _isInitialSyncComplete;
-    }
     #endregion
-
-    #region Network Events
-    public override void OnNetworkSpawn()
-    {
-        base.OnNetworkSpawn();
-
-        if (IsClient && !IsServer)
-        {
-            RequestInitialSyncServerRpc(NetworkManager.Singleton.LocalClientId);
-        }
-    }
-    #endregion
-    
 }

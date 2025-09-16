@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e208bf77bc6be84449005e5c3baae0e0, type: 3}
   m_Name: Barrier
   m_EditorClassIdentifier: 
-  type: 0
-  primitiveType: 0
+  type: 4
+  prefab: {fileID: 543796356924764177, guid: 28f2570f47b743844809e32ade199743, type: 3}
   color: {r: 0.735849, g: 0.73298585, b: 0.3991634, a: 1}
   scale: {x: 3, y: 3, z: 3}
   minCount: 2

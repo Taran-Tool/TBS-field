@@ -16,5 +16,5 @@ MonoBehaviour:
   maxTurns: 30
   enableUnitCountCondition: 1
   enableTurnLimitCondition: 1
-  enableSuddenDeath: 1
-  suddenDeathTurn: 15
+  enableInfiniteMoves: 1
+  infiniteMovesTurn: 15

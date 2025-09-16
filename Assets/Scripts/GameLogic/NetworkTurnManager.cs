@@ -15,15 +15,15 @@ public class NetworkTurnManager : NetworkBehaviour
     public NetworkVariable<float> TurnTimer = new(0f);
     public NetworkVariable<int> ActionsRemaining = new(0);
 
-    public NetworkVariable<bool> IsSuddenDeath = new(false);
     public NetworkVariable<bool> InfiniteMovement = new(false);
+    public NetworkVariable<bool> infiniteMode = new(false);
 
     public NetworkVariable<bool> HasMoved = new(false);
     public NetworkVariable<bool> HasAttacked = new(false);
 
-    public GameRulesConfig Rules => _rules;
-
     [SerializeField] private GameRulesConfig _rules;
+
+    private bool _isInitialized = false;
 
     private void Awake()
     {
@@ -37,6 +37,7 @@ public class NetworkTurnManager : NetworkBehaviour
         }            
     }
 
+
     [ServerRpc]
     public void InitializeServerRpc(string configName)
     {
@@ -46,16 +47,44 @@ public class NetworkTurnManager : NetworkBehaviour
         }
 
         _rules = Resources.Load<GameRulesConfig>($"Rules/{configName}");
-        ResetTurnState();
+        
         RandomizeFirstPlayer();
+        SetStartData();
+
+        _isInitialized = true;
     }
 
     private void RandomizeFirstPlayer()
-    {
-        CurrentPlayer.Value = Player.Player1;
-        //CurrentPlayer.Value = Random.Range(0, 2) == 0 ? Player.Player1 : Player.Player2;
-        SyncTurnState();
+    {        
+        Player randomPlayer = Random.Range(0, 2) == 0 ? Player.Player1 : Player.Player2;
+        CurrentPlayer.Value = randomPlayer;
     }
+
+    private void SetStartData()
+    {
+        if (!IsServer)
+        {
+            return;
+        }
+        CurrentTurn.Value = 1;
+
+        ResetTurnState();    
+    }
+
+    private void ResetTurnState()
+    {
+        if (!IsServer)
+        {
+            return;
+        }
+
+        TurnTimer.Value = _rules.turnDuration;
+        ActionsRemaining.Value = 2;  
+        HasMoved.Value = false;
+        HasAttacked.Value = false;
+    }
+
+    
 
     [ServerRpc]
     public void SpendActionServerRpc(ActionTypes actionType)
@@ -82,19 +111,15 @@ public class NetworkTurnManager : NetworkBehaviour
             HasAttacked.Value = true;
         }
 
-        ActionsRemaining.Value--;
+        ActionsRemaining.Value = ActionsRemaining.Value - 1;
 
         if (ActionsRemaining.Value <= 0)
         {
             EndTurn();
-        }
-        else
-        {
-            SyncTurnState();
-        }            
+        }           
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     public void EndTurnServerRpc()
     {
         if (!IsServer)
@@ -107,67 +132,44 @@ public class NetworkTurnManager : NetworkBehaviour
 
     private void EndTurn()
     {
+        if (!IsServer)
+        {
+            return;
+        }
+
         if (CurrentPlayer.Value == Player.Player1)
         {
-            CurrentTurn.Value++;
-            CheckSuddenDeath();
+            CurrentTurn.Value = CurrentTurn.Value + 1;
+        }
+
+        if (_rules.enableInfiniteMoves &&
+            CurrentTurn.Value >= _rules.infiniteMovesTurn)
+        {
+            infiniteMode.Value = true;
         }
 
         SwitchPlayer();
         ResetTurnState();
-        SyncTurnState();
-    }
 
-    private void CheckSuddenDeath()
-    {
-        if (_rules.enableTurnLimitCondition &&
-        _rules.enableSuddenDeath &&
-        CurrentTurn.Value >= _rules.suddenDeathTurn)
-        {
-            IsSuddenDeath.Value = true;
-            // Проверяем условие ничьей
-            var victorySystem = NetworkVictorySystem.instance;
-            if (victorySystem != null)
-            {
-                victorySystem.CheckVictory();
-            }
-        }
+        NetworkVictorySystem.instance?.CheckAllConditions();
     }
 
     private void SwitchPlayer()
     {
+        if (!IsServer)
+        {
+            return;
+        }
         CurrentPlayer.Value = CurrentPlayer.Value == Player.Player1 ?
             Player.Player2 : Player.Player1;
     }
 
-    private void ResetTurnState()
-    {
-        TurnTimer.Value = _rules.turnDuration;
-        ActionsRemaining.Value = 2; // 2 действия за ход, для перспективы
-        HasMoved.Value = false;
-        HasAttacked.Value = false;
-    }
-
-    private void SyncTurnState()
-    {
-        NetworkSyncHandler.instance.SyncGameStateClientRpc(
-            CurrentPlayer.Value,
-            CurrentTurn.Value,
-            TurnTimer.Value,
-            ActionsRemaining.Value,
-            IsSuddenDeath.Value,
-            InfiniteMovement.Value,
-            HasMoved.Value,   
-            HasAttacked.Value
-        );
-    }
-
     private void Update()
     {
-        if (!IsServer)
+        if (!IsServer || !_isInitialized)
         {
             return;
-        }            
+        }
 
         TurnTimer.Value -= Time.deltaTime;
         if (TurnTimer.Value <= 0)
@@ -176,20 +178,9 @@ public class NetworkTurnManager : NetworkBehaviour
         }            
     }
 
-    [ServerRpc]
-    public void SetInfiniteMovementServerRpc(bool enabled)
-    {
-        if (!IsServer)
-        {
-            return;
-        }
-
-        InfiniteMovement.Value = enabled;
-        SyncTurnState();
-    }
-
     public bool IsLocalPlayersTurn()
     {
-        return CurrentPlayer.Value == NetworkCommandHandler.instance.GetLocalPlayer();
+        return CurrentPlayer.Value == NetworkPlayersManager.instance.GetLocalPlayer();
     }
+
 }

@@ -9,8 +9,8 @@ public static class GameSystemFactory
     private static readonly Dictionary<Type, Func<NetworkObject>> _factories = new()
     {
         {
-            typeof(NetworkCommandHandler),
-            () => CreatePrefab("Prefabs/NetworkCommandHandler", "NetworkCommandHandler")
+            typeof(NetworkPlayersManager),
+            () => CreatePrefab("Prefabs/NetworkPlayersManager", "NetworkPlayersManager")
         },
         {
             typeof(NetworkSyncHandler),
@@ -50,11 +50,6 @@ public static class GameSystemFactory
         {
             typeof(NetworkVictorySystem),
             () => CreatePrefab("Prefabs/NetworkVictorySystem", "NetworkVictorySystem")
-        }
-        ,
-        {
-            typeof(CameraController),
-            () => CreatePrefab("Prefabs/CameraController", "CameraController")
         }
     };
 

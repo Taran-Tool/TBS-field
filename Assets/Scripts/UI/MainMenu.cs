@@ -14,7 +14,7 @@ public class MainMenu : MonoBehaviour
     {
         _hostPanel.SetActive(false);
         _joinPanel.SetActive(true);
-        _ipInputField.text = "localhost";
+        _ipInputField.text = "127.0.0.1";
     }
 
     public void ReturnToMainMenu()
@@ -31,7 +31,6 @@ public class MainMenu : MonoBehaviour
     public void OnJoinButtonClick()
     {
         GameNetworkManager.instance.JoinGame(_ipInputField.text);
-        NetworkSceneManager.instance.LoadGameScene();
     }
 
     public void OnQuitButtonClick()

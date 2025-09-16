@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Ruin
   m_EditorClassIdentifier: 
   type: 3
-  primitiveType: 3
+  prefab: {fileID: 7766645667535446582, guid: 42da9e804c9a6fc4cb42ed892106bbfa, type: 3}
   color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   scale: {x: 6, y: 6, z: 6}
   minCount: 1

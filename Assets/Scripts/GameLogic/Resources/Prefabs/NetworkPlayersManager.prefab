@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5497734430566963122
+--- !u!1 &7509874071513385447
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,44 +8,44 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 939213570774740499}
-  - component: {fileID: 2709814429144039323}
-  - component: {fileID: 8292903406081201778}
+  - component: {fileID: 5847903081017952432}
+  - component: {fileID: 5447823948106383457}
+  - component: {fileID: 4003724896624435614}
   m_Layer: 0
-  m_Name: NetworkWorldGenerator
+  m_Name: NetworkPlayersManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &939213570774740499
+--- !u!4 &5847903081017952432
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5497734430566963122}
+  m_GameObject: {fileID: 7509874071513385447}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 532.11194, y: 313.45074, z: 18.121033}
+  m_LocalPosition: {x: 268.1542, y: 253.95981, z: -48.597534}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2709814429144039323
+--- !u!114 &5447823948106383457
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5497734430566963122}
+  m_GameObject: {fileID: 7509874071513385447}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2456750320
+  GlobalObjectIdHash: 2041785018
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -54,27 +54,15 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
---- !u!114 &8292903406081201778
+--- !u!114 &4003724896624435614
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5497734430566963122}
+  m_GameObject: {fileID: 7509874071513385447}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a548d960858bc874b8a6864da540b5c6, type: 3}
+  m_Script: {fileID: 11500000, guid: 57b40a0ac9cfb3644959518c85b3b216, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _mapWidth: 64
-  _mapHeight: 64
-  _cellSize: 1
-  _spawnZoneSize: 5
-  _groundMaterial: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
-  _obstacleConfigs:
-  - {fileID: 11400000, guid: 7cf9785d277954c4caee21e5af773644, type: 2}
-  - {fileID: 11400000, guid: 410c82037e6f0b342bb33df8fab82d35, type: 2}
-  - {fileID: 11400000, guid: 1a257d63665120a4aa7abf1618202e8a, type: 2}
-  - {fileID: 11400000, guid: 98eaa0c4d60df014c88170a8f78e9df8, type: 2}
-  - {fileID: 11400000, guid: 20c1213a40f59bf4b8677cffca76e2a4, type: 2}
-  - {fileID: 11400000, guid: b6043a210c198774aadb9c1caa149011, type: 2}

@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 5909165319495109001}
   - component: {fileID: 6971501713588897412}
   - component: {fileID: 7725123984578111419}
-  - component: {fileID: 4574801217128095354}
-  - component: {fileID: 4232330034649822317}
-  - component: {fileID: 5155334765468940578}
+  - component: {fileID: -8388330181474035315}
+  - component: {fileID: 1944012956413788762}
+  - component: {fileID: 6081627467455007754}
   m_Layer: 0
   m_Name: NetworkActionsSystem
   m_TagString: Untagged
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1888168799
+  GlobalObjectIdHash: 552313313
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -70,7 +70,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pathMaterial: {fileID: 2100000, guid: 4cacf3d480c580540a2e29dadbaee6de, type: 2}
---- !u!114 &4574801217128095354
+--- !u!114 &-8388330181474035315
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -79,13 +79,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 6565706539961485613}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a3da5d79d6d15f241ab091eec4fe2887, type: 3}
+  m_Script: {fileID: 11500000, guid: 805f628b44459444f8be9312c8899347, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _unitLayer:
     serializedVersion: 2
-    m_Bits: 0
---- !u!114 &4232330034649822317
+    m_Bits: 128
+--- !u!114 &1944012956413788762
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -94,14 +94,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 6565706539961485613}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6da5636819de25d4da86bfae6c4887ab, type: 3}
+  m_Script: {fileID: 11500000, guid: 162aac75de6c4ce47a20371b8805bc73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _groundLayer:
     serializedVersion: 2
-    m_Bits: 0
-  pathNodeHeight: 0.2
---- !u!114 &5155334765468940578
+    m_Bits: 64
+  _obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  _unitLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  _pathNodeHeight: 0.2
+  _pathLineWidth: 0.2
+  _validPathColor: {r: 0, g: 1, b: 0, a: 1}
+  _partialPathColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _doubleClickTime: 0.3
+--- !u!114 &6081627467455007754
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -110,6 +120,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6565706539961485613}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: afd41edc891d79342a5ca152a6a91c83, type: 3}
+  m_Script: {fileID: 11500000, guid: 80976d7a129a88d4197ee204bfdfa01b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _rangeIndicator: {fileID: 8696746689349401338, guid: 30928df42bad609408bbb0d7a472b73b, type: 3}

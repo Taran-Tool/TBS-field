@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2723090189118340593}
   - component: {fileID: 2136305443406290527}
   - component: {fileID: 1885510073660251053}
+  - component: {fileID: -4643682943859508532}
   m_Layer: 0
   m_Name: Warrior
   m_TagString: Untagged
@@ -66,7 +67,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: c0adfaf65c6a88346bfd6a3c160d6595, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -123,7 +124,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 834409094
+  GlobalObjectIdHash: 259757822
   InScenePlacedSourceGlobalObjectIdHash: 259757822
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -146,6 +147,55 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _renderer: {fileID: 4434566867749345537}
   _selectionIndicator: {fileID: 4169552125843638250}
+--- !u!114 &-4643682943859508532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1484292197086444612}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12855172980f5f74abaa634f67bd2d5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObjectTag:
+    m_InternalValue:
+      utf8LengthInBytes: 0
+      bytes:
+        offset0000:
+          byte0000: 0
+          byte0001: 0
+          byte0002: 0
+          byte0003: 0
+          byte0004: 0
+          byte0005: 0
+          byte0006: 0
+          byte0007: 0
+          byte0008: 0
+          byte0009: 0
+          byte0010: 0
+          byte0011: 0
+          byte0012: 0
+          byte0013: 0
+          byte0014: 0
+          byte0015: 0
+        byte0016: 0
+        byte0017: 0
+        byte0018: 0
+        byte0019: 0
+        byte0020: 0
+        byte0021: 0
+        byte0022: 0
+        byte0023: 0
+        byte0024: 0
+        byte0025: 0
+        byte0026: 0
+        byte0027: 0
+        byte0028: 0
+        byte0029: 0
+  ObjectLayer:
+    m_InternalValue: 0
 --- !u!1 &2312098951031348741
 GameObject:
   m_ObjectHideFlags: 0

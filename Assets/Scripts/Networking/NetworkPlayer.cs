@@ -7,30 +7,46 @@ using System;
 
 public class NetworkPlayer : NetworkBehaviour
 {
-    [SerializeField] public NetworkVariable<Player> team = new NetworkVariable<Player>();
+    [SerializeField] public NetworkVariable<Player> team = new(writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] public GameObject cameraControllerPrefab;
+
+    public NetworkList<int> UnitIds
+    {
+        get; private set;
+    }
+
     public Player Team
     {
         get => team.Value;
         set => team.Value = value;
     }
 
+    private static GameObject _localPlayerCamera;
+
+    private void Awake()
+    {
+        UnitIds = new NetworkList<int>();
+    }
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+
         if (IsOwner)
         {
-            if (NetworkManager.Singleton.IsHost)
-            {
-                gameObject.tag = "HostPlayer";
-                Team = Player.Player1;
-            }
-            else
-            {
-                Team = Player.Player2;
-            }
-            //отображаю GUI игрока согласно его команде
-            GameHUD.instance.SetLocalPlayer(Team);
+            GameHUD.instance?.SetLocalPlayer(Team);
+            StartCoroutine(WaitAndInitialize());
         }
+    }
+
+    private IEnumerator WaitAndInitialize()
+    {
+        while (NetworkPlayersManager.instance == null)
+        {
+            yield return null;
+        }
+
+        SpawnCameraController(transform);
     }
 
     public static Color GetTeamColor(Player player)
@@ -42,8 +58,31 @@ public class NetworkPlayer : NetworkBehaviour
             _ => Color.gray
         };
     }
-}
 
+    public void SpawnCameraController(Transform playerObjectTransform)
+    {
+        if (_localPlayerCamera != null)
+        {
+            return;
+        }
+        
+        var camera = Instantiate(cameraControllerPrefab);
+
+        camera.name = NetworkPlayersManager.instance.GetLocalPlayer().ToString() + "_Camera";
+        camera.GetComponent<CameraController>().Initialize(playerObjectTransform);
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        // Очищаем ссылку при отключении
+        if (IsClient && _localPlayerCamera != null)
+        {
+            Destroy(_localPlayerCamera);
+            _localPlayerCamera = null;
+        }
+        base.OnNetworkDespawn();
+    }
+}
 
 public enum Player
 {
@@ -51,3 +90,4 @@ public enum Player
     Player1 = 1, // Первый игрок (хост)
     Player2 = 2  // Второй игрок (клиент)
 }
+

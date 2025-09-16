@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Building
   m_EditorClassIdentifier: 
   type: 2
-  primitiveType: 3
+  prefab: {fileID: 1227692992894345538, guid: 0d3e4365cc4b04548861d40d3711544d, type: 3}
   color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   scale: {x: 4, y: 4, z: 4}
   minCount: 1

@@ -11,11 +11,9 @@ public class NetworkUnitSelectionSystem : NetworkBehaviour
 
     public NetworkUnit SelectedUnit => _selectedUnit;
 
-
-
     private void Update()
     {
-        if (!IsClient || !IsOwner)
+        if (!IsClient)
         {
             return;
         }
@@ -31,7 +29,7 @@ public class NetworkUnitSelectionSystem : NetworkBehaviour
             if (Physics.Raycast(ray, out var hit, Mathf.Infinity, _unitLayer))
             {
                 var unit = hit.collider.GetComponent<NetworkUnit>();
-                if (unit != null && NetworkCommandHandler.instance.IsLocalPlayersUnit(unit))
+                if (unit != null && NetworkPlayersManager.instance.IsLocalPlayersUnit(unit))
                 {
                     SelectUnit(unit);
                 }
@@ -57,7 +55,7 @@ public class NetworkUnitSelectionSystem : NetworkBehaviour
         if (units.Count == 0)
         {
             return;
-        }               
+        }
 
         _currentUnitIndex = (_currentUnitIndex + 1) % units.Count;
         SelectUnit(units[_currentUnitIndex]);
@@ -77,10 +75,9 @@ public class NetworkUnitSelectionSystem : NetworkBehaviour
 
     private List<NetworkUnit> GetLocalPlayerUnits()
     {
-        NetworkPlayer localPlayer = NetworkCommandHandler.instance.GetLocalNetworkPlayer();
-        return localPlayer != null ?
-            NetworkUnitsManager.instance.GetPlayerUnits(localPlayer.Team) :
-            new List<NetworkUnit>();
+        NetworkPlayer localPlayer = NetworkPlayersManager.instance.GetLocalNetworkPlayer();
+
+        return localPlayer != null ? ClientUnitsCache.GetPlayerUnits(localPlayer) : new List<NetworkUnit>();
     }
 
     public void SetUnitsLayer(string layerName)
@@ -101,5 +98,37 @@ public class NetworkUnitSelectionSystem : NetworkBehaviour
         _selectedUnit?.SetSelected(false);
         _selectedUnit = unit;
         unit.SetSelected(true);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SelectUnitServerRpc(int unitId, ServerRpcParams rpcParams = default)
+    {
+        var unit = NetworkUnitsManager.instance.GetUnitById(unitId);
+        if (unit != null && NetworkValidator.ValidateSelect(rpcParams.Receive.SenderClientId, unitId))
+        {
+            SelectUnitClientRpc(unitId, rpcParams.Receive.SenderClientId);
+        }
+    }
+
+    [ClientRpc]
+    private void SelectUnitClientRpc(int unitId, ulong clientId)
+    {
+        if (NetworkManager.Singleton.LocalClientId == clientId)
+        {
+            var unit = NetworkUnitsManager.instance.GetUnitById(unitId);
+            if (unit != null)
+            {
+                _selectedUnit?.SetSelected(false);
+                _selectedUnit = unit;
+                unit.SetSelected(true);
+            }
+        }
+    }
+
+    public void ClearSelection()
+    {
+        _selectedUnit?.SetSelected(false);
+        _selectedUnit = null;
+        _currentUnitIndex = -1;
     }
 }

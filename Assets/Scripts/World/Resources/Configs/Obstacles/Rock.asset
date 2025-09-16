@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Rock
   m_EditorClassIdentifier: 
   type: 0
-  primitiveType: 3
+  prefab: {fileID: 6324846687742642023, guid: e734e761f101a5242be78704fa5e9468, type: 3}
   color: {r: 0.2924528, g: 0.24180393, b: 0.20554467, a: 1}
   scale: {x: 1, y: 1, z: 1}
   minCount: 6

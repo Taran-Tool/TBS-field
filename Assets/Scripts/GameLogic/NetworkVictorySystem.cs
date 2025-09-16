@@ -11,7 +11,6 @@ public class NetworkVictorySystem : NetworkBehaviour
     }
 
     private List<IVictoryCondition> _conditions = new();
-    private GameRulesConfig _rules;
 
     private void Awake()
     {
@@ -33,38 +32,48 @@ public class NetworkVictorySystem : NetworkBehaviour
             return;
         }
 
-        _rules = Resources.Load<GameRulesConfig>($"Rules/{configName}");
         SetupConditions();
     }
 
     private void SetupConditions()
     {
-        if (_rules.enableUnitCountCondition)
-        {
-            _conditions.Add(new UnitCountVictoryCondition());
-        }
+        _conditions.Clear();
 
-        if (_rules.enableTurnLimitCondition && _rules.enableSuddenDeath)
-        {
-            _conditions.Add(new Turn15DrawCondition());
-        }           
+        _conditions.Add(new UnitCountVictoryCondition());
+        _conditions.Add(new Turn15InfiniteMoves());         
     }
 
-    public void CheckVictory()
+    public void CheckAllConditions()
     {
+
         if (!IsServer)
         {
             return;
         }
-
+        
         foreach (var condition in _conditions)
         {
             var result = condition.CheckCondition();
+
             if (result.HasValue)
             {
-                NetworkSyncHandler.instance.AnnounceVictoryClientRpc(result.Value);
+                HandleVictoryResult(result.Value);
                 break;
             }
+        }
+    }
+
+    private void HandleVictoryResult(GameResult result)
+    {
+        switch (result)
+        {
+            case GameResult.InfiniteMoves:
+            NetworkTurnManager.instance.InfiniteMovement.Value = true;
+            break;
+
+            default:
+            NetworkSyncHandler.instance.AnnounceVictoryClientRpc(result);
+            break;
         }
     }
 }

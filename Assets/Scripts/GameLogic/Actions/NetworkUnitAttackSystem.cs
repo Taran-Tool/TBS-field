@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using System.Linq;
 
 public class NetworkUnitAttackSystem : NetworkBehaviour
 {
     private GameObject _attackRangeIndicator;
     private List<NetworkUnit> _targetsInRange = new List<NetworkUnit>();
     private NetworkUnit _selectedUnit;
+    [SerializeField] private GameObject _rangeIndicator;
 
     public void ShowAttackRange(Vector3 position, float radius)
     {
@@ -20,43 +22,39 @@ public class NetworkUnitAttackSystem : NetworkBehaviour
         _attackRangeIndicator.transform.localScale = Vector3.one * radius * 2;
         _attackRangeIndicator.SetActive(true);
 
+
         FindTargetsInRange(position, radius);
     }
 
     private void CreateIndicator()
     {
-        _attackRangeIndicator = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        _attackRangeIndicator = Instantiate(Resources.Load<GameObject>("Prefabs/RangeIndicator"));
         _attackRangeIndicator.GetComponent<Collider>().enabled = false;
-        var mat = new Material(Shader.Find("Transparent/Diffuse"));
-        mat.color = new Color(1, 0, 0, 0.2f);
-        _attackRangeIndicator.GetComponent<Renderer>().material = mat;
     }
 
     private void FindTargetsInRange(Vector3 center, float radius)
     {
-        List<NetworkUnit> validTargets = new List<NetworkUnit>();
-
-        foreach (var unit in _targetsInRange)
-        {
-            if (unit != null && unit.gameObject != null)
-            {
-                HighlightTarget(unit, false);
-                validTargets.Add(unit);
-            }
-        }
-        _targetsInRange = validTargets;
-
         if (_selectedUnit == null || _selectedUnit.gameObject == null)
-            return;
-
-        foreach (var unit in NetworkUnitsManager.instance.GetAllUnits())
         {
+            return;
+        }
+
+        ClearTargets();
+
+        Collider[] hitColliders = Physics.OverlapSphere(center, radius, LayerMask.GetMask("Unit"));
+
+        foreach (var collider in hitColliders)
+        {
+            NetworkUnit unit = collider.GetComponent<NetworkUnit>();
             if (unit == null || unit.gameObject == null)
                 continue;
+
+            // Пропускаем юнитов того же владельца
             if (unit.Owner == _selectedUnit.Owner)
                 continue;
 
-            float distance = Vector3.Distance(center, unit.Position);
+            // Дополнительная проверка точного расстояния (OverlapSphere может давать неточности)
+            float distance = Vector3.Distance(center, unit.transform.position);
             if (distance <= radius && HasLineOfSight(_selectedUnit, unit))
             {
                 _targetsInRange.Add(unit);
@@ -76,27 +74,32 @@ public class NetworkUnitAttackSystem : NetworkBehaviour
         {
             return false;
         }
-
         return true;
     }
 
     private void HighlightTarget(NetworkUnit unit, bool highlight)
     {
         if (unit == null || unit.gameObject == null)
+        {
             return;
+        }
 
         Transform indicator = unit.transform.Find("Indicator");
         if (indicator == null)
+        {
             return;
+        }
 
         Renderer indicatorRenderer = indicator.GetComponent<Renderer>();
         if (indicatorRenderer == null)
+        {
             return;
+        }
 
         // Меняем цвет и активность в зависимости от типа подсветки
         if (highlight)
         {
-            indicatorRenderer.material.color = Color.red;
+            indicatorRenderer.material.color = Color.magenta;
             indicator.gameObject.SetActive(true);
         }
         else
@@ -107,10 +110,10 @@ public class NetworkUnitAttackSystem : NetworkBehaviour
                     NetworkActionsSystem.instance.UnitSelectionSystem != null &&
                     unit == NetworkActionsSystem.instance.UnitSelectionSystem.SelectedUnit)
                 {
-                    indicatorRenderer.material.color = Color.green;
+                    indicatorRenderer.material.color = Color.red;
                 }
-                else if (NetworkCommandHandler.instance != null &&
-                        unit.Owner == NetworkCommandHandler.instance.GetLocalPlayer())
+                else if (NetworkPlayersManager.instance != null &&
+                        unit.Owner == NetworkPlayersManager.instance.GetLocalPlayer())
                 {
                     indicatorRenderer.material.color = Color.blue;
                 }
@@ -129,6 +132,11 @@ public class NetworkUnitAttackSystem : NetworkBehaviour
     public void HandleAttackInput(NetworkUnit selectedUnit)
     {
         _selectedUnit = selectedUnit;
+
+        if (!NetworkTurnManager.instance.IsLocalPlayersTurn())
+        {
+            return;
+        }
 
         if (Input.GetMouseButtonDown(1))
         {
@@ -153,14 +161,14 @@ public class NetworkUnitAttackSystem : NetworkBehaviour
         }
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     public void AttackUnitServerRpc(int attackerId, int targetId, ServerRpcParams rpcParams = default)
     {
         if (!IsServer)
         {
             return;
         }
-        if (!NetworkValidator.ValidateAction(rpcParams.Receive.SenderClientId, attackerId))
+        if (!NetworkValidator.ValidateAttack(rpcParams.Receive.SenderClientId, attackerId))
         {
             return;
         }
@@ -183,24 +191,41 @@ public class NetworkUnitAttackSystem : NetworkBehaviour
             return;
         }
 
-        if (IsInAttackRange(attacker, target) && HasLineOfSight(attacker, target))
+        if (!IsInAttackRange(attacker, target))
         {
-            ExecuteAttack(attacker, target);
-            NetworkTurnManager.instance.SpendActionServerRpc(ActionTypes.Attack);
-            NetworkVictorySystem.instance.CheckVictory();
+            return;
         }
+
+        if (!HasLineOfSight(attacker, target))
+        {
+            return;
+        }
+        
+        ExecuteAttack(attacker, target);
+        NetworkTurnManager.instance.SpendActionServerRpc(ActionTypes.Attack);
+        NetworkVictorySystem.instance.CheckAllConditions();
     }
 
     private bool IsInAttackRange(NetworkUnit attacker, NetworkUnit target)
-    {
+    {        
         float distance = Vector3.Distance(attacker.Position, target.Position);
+
         return distance <= attacker.AttackRange;
     }
 
     private void ExecuteAttack(NetworkUnit attacker, NetworkUnit target)
     {
         if (attacker == null || target == null)
+        {
             return;
+        }
+
+        // Очищаем выделение, если уничтожаем выделенный юнит
+        if (NetworkActionsSystem.instance.UnitSelectionSystem.SelectedUnit == target)
+        {
+            NetworkActionsSystem.instance.UnitSelectionSystem.ClearSelection();
+        }
+
         // В реальной игре здесь должна быть анимация атаки
         if (target != null && target.gameObject != null)
         {
@@ -213,7 +238,7 @@ public class NetworkUnitAttackSystem : NetworkBehaviour
 
     public void ClearTargets()
     {
-        foreach (var unit in _targetsInRange)
+        foreach (var unit in _targetsInRange.ToList())
         {
             if (unit != null && unit.gameObject != null)
             {
@@ -221,7 +246,10 @@ public class NetworkUnitAttackSystem : NetworkBehaviour
             }
         }
         _targetsInRange.Clear();
+    }
 
+    public void HideAttackRange()
+    {
         if (_attackRangeIndicator != null)
         {
             _attackRangeIndicator.SetActive(false);

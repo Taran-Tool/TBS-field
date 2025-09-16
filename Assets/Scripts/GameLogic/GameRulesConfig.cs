@@ -12,6 +12,6 @@ public class GameRulesConfig : ScriptableObject
     [Header("Victory Conditions")]
     public bool enableUnitCountCondition = true;
     public bool enableTurnLimitCondition = true;
-    public bool enableSuddenDeath = true;
-    public int suddenDeathTurn = 15;
+    public bool enableInfiniteMoves = true;
+    public int infiniteMovesTurn = 15;
 }
