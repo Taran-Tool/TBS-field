@@ -5138,6 +5138,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6061590709549964939, guid: 9131df75ce6dc8841881b3ce0cab1c4f, type: 3}
+      propertyPath: ConnectionData.Address
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061590709549964939, guid: 9131df75ce6dc8841881b3ce0cab1c4f, type: 3}
+      propertyPath: ConnectionData.ServerListenAddress
+      value: 0.0.0.0
+      objectReference: {fileID: 0}
     - target: {fileID: 8597709117891773934, guid: 9131df75ce6dc8841881b3ce0cab1c4f, type: 3}
       propertyPath: NetworkConfig.LoadSceneTimeOut
       value: 1200
