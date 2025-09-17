@@ -567,5 +567,9 @@
  ## ИТОГ 
  Все основные пункты из ТЗ выполняются.
 
+![TBS-field](menu.png)
+![TBS-field](world.png)
+![TBS-field](path.png)
+![TBS-field](attackfield.png)
 
 
